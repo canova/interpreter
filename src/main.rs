@@ -8,19 +8,19 @@ mod lexer;
 
 fn main() {
 
-	let args: Vec<_> = env::args().collect();
-	let mut path = Path::new("src/test.c");
+    let args: Vec<_> = env::args().collect();
+    let mut path = Path::new("src/test.c");
 
     // For custom test source file for interpreting.
-	if args.len() > 1 {
+    if args.len() > 1 {
         println!("Your source file is: {}", args[1]);
         path = Path::new(&*args[1]);
     }
 
-	let display = path.display();
-	
-	let mut file = match File::open(&path) {
-    	// The `description` method of `io::Error` returns a string that
+    let display = path.display();
+    
+    let mut file = match File::open(&path) {
+        // The `description` method of `io::Error` returns a string that
         // describes the error
         Err(why) => panic!("couldn't open {}: {}", display, Error::description(&why)),
         Ok(file) => file,
@@ -33,10 +33,11 @@ fn main() {
         Ok(_) => print!("{} contains:\n{}", display, code),
     }
 
-    let mut lexemes = lexer::Lexer::Initiate(code);
+    // Get Lexemes from the Lexer Module
+    let lexemes = lexer::Lexer::Initiate(code);
 
-    //We have the Tokens list now. Printing for debugging
+    // We have the Tokens list now. Printing for debugging
     for token in lexemes {
-	    println!("{:?}", token);
-	}
+        println!("{:?}", token);
+    }
 }
