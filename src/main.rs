@@ -9,7 +9,7 @@ mod lexer;
 fn main() {
 
     let args: Vec<_> = env::args().collect();
-    let mut path = Path::new("src/test.c");
+    let mut path = Path::new("src/test/main.c");
 
     // For custom test source file for interpreting.
     if args.len() > 1 {
@@ -34,10 +34,10 @@ fn main() {
     }
 
     // Get Lexemes from the Lexer Module
-    let lexemes = lexer::Lexer::Initiate(code);
+    let tokens = lexer::Initiate(code);
 
     // We have the Tokens list now. Printing for debugging
-    for token in lexemes {
+    for token in &tokens {
         println!("{:?}", token);
     }
 }
