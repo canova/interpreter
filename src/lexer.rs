@@ -68,10 +68,10 @@ impl Token {
 }
 
 pub fn Initiate(code: String) -> Vec<Token> {
-    lexit(code)
+    lexIt(code)
 }
 
-fn lexit(code: String) -> Vec<Token> {
+fn lexIt(code: String) -> Vec<Token> {
     let mut tokens : Vec<Token> = vec![]; // OR Vec::new();
     let charCount = code.chars().count();
     let mut i = 0;

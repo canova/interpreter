@@ -5,6 +5,7 @@ use std::path::Path;
 use std::env;
 
 mod lexer;
+mod parser;
 
 fn main() {
 
@@ -40,4 +41,6 @@ fn main() {
     for token in &tokens {
         println!("{:?}", token);
     }
+
+    let parseTree = parser::Initiate(tokens);
 }
