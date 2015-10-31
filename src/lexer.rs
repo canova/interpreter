@@ -6,32 +6,32 @@
 
 #[derive(Debug)]
 pub enum Token {
-    Keyword(String), // like int, string or let
+    Keyword(String),    // like int, string or let
     Identifier(String), // like variable names
-    Char(String), // Char variables, inside " ' ""
-    String(String), // String variables, inside quotes
-    Number(String), // Number variable
-    True, // boolean true
-    False, // boolean false
-    Equals, // =
-    Plus, // +
-    Minus, // -
-    Multiple, // *
-    Divide, // /
-    Mod, // %
-    Greater, // >
-    Lesser, // <
-    GreaterEqual, // >=
-    LesserEqual, // <=
-    LParen, // (
-    RParen, // )
-    LBrace, // {
-    RBrace, // }
-    LBracket, // [
-    RBracket, // ]
-    Comma, // ,
-    Semicolon, // ;
-    Comment // "//"
+    Char(String),       // Char variables, inside " ' "
+    String(String),     // String variables, inside quotes
+    Number(String),     // Number variable
+    True,               // Boolean true
+    False,              // Boolean false
+    Equals,             // =
+    Plus,               // +
+    Minus,              // -
+    Multiple,           // *
+    Divide,             // /
+    Mod,                // %
+    Greater,            // >
+    Lesser,             // <
+    GreaterEqual,       // >=
+    LesserEqual,        // <=
+    LParen,             // (
+    RParen,             // )
+    LBrace,             // {
+    RBrace,             // }
+    LBracket,           // [
+    RBracket,           // ]
+    Comma,              // ,
+    Semicolon,          // ;
+    Comment             // '//'
 }
 
 impl Token {
@@ -77,35 +77,33 @@ fn lexIt(code: String) -> Vec<Token> {
     let mut i = 0;
 
     while i <  charCount {
-        
         let mut currentChar = code.chars().nth(i).unwrap();
+
         // If char is whitespace, just pass the current char
         if currentChar.is_whitespace() {
             i += 1;
-        } 
+        }
         // If char starts with alphabetic characters
         else if currentChar.is_alphabetic() {
             let mut tmp = "".to_string();
 
             // If current char is not out of our code scope and char starts with alphanumeric (alphabetic or numeric) characters
             while i < charCount && code.chars().nth(i).unwrap().is_alphanumeric() {
-                
+
                 tmp = tmp + &*code.chars().nth(i).unwrap().to_string();
                 i += 1;
             }
 
             //We have the word, now we need to find what it is and tokenize it.
-            match &*tmp {
-                "main" => tokens.push(Token::Keyword("main".to_string())),
-                "int" => tokens.push(Token::Keyword("int".to_string())),
-                "string" => tokens.push(Token::Keyword("string".to_string())),
-                "bool" => tokens.push(Token::Keyword("bool".to_string())),
-                "print" => tokens.push(Token::Keyword("print".to_string())),
-                "get" => tokens.push(Token::Keyword("get".to_string())),
-                "true" => tokens.push(Token::True),
-                "false" => tokens.push(Token::False),
-                "return" => tokens.push(Token::Keyword("return".to_string())),
-                _ => tokens.push(Token::Identifier(tmp)),
+            let tmpStr = tmp.to_lowercase();
+            if isKeyword(&tmpStr) {
+                tokens.push(Token::Keyword(tmpStr));
+            } else if tmpStr == "true" {
+                tokens.push(Token::True);
+            } else if tmpStr == "false" {
+                tokens.push(Token::False);
+            } else {
+                tokens.push(Token::Identifier(tmpStr));
             }
         }
         // If current char is a numerical character
@@ -134,9 +132,8 @@ fn lexIt(code: String) -> Vec<Token> {
         }
         // If current char is a real char
         else if currentChar == '\'' {
-            i += 1;
-            let tmp = code.chars().nth(i).unwrap();
-            i += 1;
+            let tmp = code.chars().nth(i + 1).unwrap();
+            i += 2;
 
             if code.chars().nth(i).unwrap() == '\'' {
                 tokens.push(Token::Char(tmp.to_string()));
@@ -193,7 +190,7 @@ fn lexIt(code: String) -> Vec<Token> {
             } else {
                 tokens.push(Token::Greater);
             }
-            
+
             i += 1;
         }
         // If current char is a lesser than (<) or lesser than or equal to (<=)
@@ -240,12 +237,12 @@ fn lexIt(code: String) -> Vec<Token> {
         else if currentChar == ',' {
             tokens.push(Token::Comma);
             i += 1;
-        } 
+        }
         // If current char is an semicolon ( ; )
         else if currentChar == ';' {
             tokens.push(Token::Semicolon);
             i += 1;
-        } 
+        }
         // Else throw an exception
         else {
             unexpectedToken(currentChar, i);
@@ -255,7 +252,11 @@ fn lexIt(code: String) -> Vec<Token> {
     tokens
 }
 
+fn isKeyword(value: &String) -> bool {
+    let valueStr = &*value;
+    value == "main" || value == "int" || value == "string" || value == "bool" || value == "print" || value == "get" || value == "return"
+}
+
 fn unexpectedToken(c: char, i: usize) {
     panic!("Unexpected token: {:?} at {:?}th letter!", c, i);
 }
-
