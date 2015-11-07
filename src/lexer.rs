@@ -35,34 +35,34 @@ pub enum Token {
 }
 
 impl Token {
-    pub fn toString(&self) -> &str {
+    pub fn toString(&self) -> String {
         match *self {
-            Token::Keyword(ref x) => "Keyword",
-            Token::Identifier(ref x) => "Identifier",
-            Token::Char(ref x) => "Char",
-            Token::String(ref x) => "String",
-            Token::Number(ref x) => "Number",
-            Token::True => "True",
-            Token::False => "False",
-            Token::Equals => "Equals",
-            Token::Plus => "Plus",
-            Token::Minus => "Minus",
-            Token::Multiple => "Multiple",
-            Token::Divide => "Divide",
-            Token::Mod => "Mod",
-            Token::Greater => "Greater",
-            Token::Lesser => "Lesser",
-            Token::GreaterEqual => "GreaterEqual",
-            Token::LesserEqual => "LesserEqual",
-            Token::LParen => "LParen",
-            Token::RParen => "RParen",
-            Token::LBrace => "LBrace",
-            Token::RBrace => "RBrace",
-            Token::LBracket => "LBracket",
-            Token::RBracket => "RBracket",
-            Token::Comma => "Comma",
-            Token::Semicolon => "Semicolon",
-            Token::Comment => "Comment"
+            Token::Keyword(ref x) => format!("Keyword({})", x),
+            Token::Identifier(ref x) => format!("Identifier({})", x),
+            Token::Char(ref x) => format!("Char({})", x),
+            Token::String(ref x) => format!("String({})", x),
+            Token::Number(ref x) => format!("Number({})", x),
+            Token::True => "True".to_string(),
+            Token::False => "False".to_string(),
+            Token::Equals => "Equals".to_string(),
+            Token::Plus => "Plus".to_string(),
+            Token::Minus => "Minus".to_string(),
+            Token::Multiple => "Multiple".to_string(),
+            Token::Divide => "Divide".to_string(),
+            Token::Mod => "Mod".to_string(),
+            Token::Greater => "Greater".to_string(),
+            Token::Lesser => "Lesser".to_string(),
+            Token::GreaterEqual => "GreaterEqual".to_string(),
+            Token::LesserEqual => "LesserEqual".to_string(),
+            Token::LParen => "LParen".to_string(),
+            Token::RParen => "RParen".to_string(),
+            Token::LBrace => "LBrace".to_string(),
+            Token::RBrace => "RBrace".to_string(),
+            Token::LBracket => "LBracket".to_string(),
+            Token::RBracket => "RBracket".to_string(),
+            Token::Comma => "Comma".to_string(),
+            Token::Semicolon => "Semicolon".to_string(),
+            Token::Comment => "Comment".to_string()
         }
     }
 }
