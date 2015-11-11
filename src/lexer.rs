@@ -139,7 +139,7 @@ fn lexIt(code: String) -> Vec<Token> {
                 tokens.push(Token::Char(tmp.to_string()));
                 i += 1;
             } else {
-                unexpectedToken(code.chars().nth(i).unwrap(), i);
+                unexpectedToken(code.chars().nth(i).unwrap(), &code, i);
             }
         }
         // If current char is an equals (=)
@@ -245,7 +245,7 @@ fn lexIt(code: String) -> Vec<Token> {
         }
         // Else throw an exception
         else {
-            unexpectedToken(currentChar, i);
+            unexpectedToken(currentChar, &code, i);
         }
     }
 
@@ -257,6 +257,20 @@ fn isKeyword(value: &String) -> bool {
     value == "main" || value == "int" || value == "string" || value == "bool" || value == "print" || value == "get" || value == "return"
 }
 
-fn unexpectedToken(c: char, i: usize) {
-    panic!("Unexpected token: {:?} at {:?}th letter!", c, i);
+fn unexpectedToken(c: char, code: &String, i: usize) {
+    let mut lineCount = 1;
+    let mut column : usize = 0;
+    let mut isFirstLine = true;
+
+    for currIndex in (0..i).rev() {
+        if code.chars().nth(currIndex).unwrap() == '\n' {
+            if isFirstLine {
+                column = i - currIndex;
+                isFirstLine = false;
+            }
+            lineCount += 1;
+        }
+    }
+
+    panic!("Unexpected token: {:?} at line {:?}, column {:?}!", c, lineCount, column);
 }
