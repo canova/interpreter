@@ -14,13 +14,21 @@ pub enum TreeNode {
 }
 
 pub fn Initiate(tokens: Vec<lexer::Token>) -> bool {
-
-    parseIt(tokens);
-    return false;
+    parseIt(&tokens);
+    false
 }
 
-fn parseIt(tokenStream: Vec<lexer::Token>) {
-    
+fn parseIt(tokenStream: &Vec<lexer::Token>) {
     let tokenCount = tokenStream.len();
-    println!("{}", tokenCount);
+    let mut stack : Vec<String> = Vec::new();
+    let mut stackCount = 0;
+    let mut i = 0;
+
+    println!("Token Count: {}", tokenCount);
+
+    while i < tokenCount {
+        //println!("{:?}", tokenStream[i]);
+        i += 1;
+
+    }
 }
