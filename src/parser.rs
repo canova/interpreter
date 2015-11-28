@@ -19,16 +19,24 @@ pub fn Initiate(tokens: Vec<lexer::Token>) -> bool {
 }
 
 fn parseIt(tokenStream: &Vec<lexer::Token>) {
+    // Total Token Count
     let tokenCount = tokenStream.len();
-    let mut stack : Vec<String> = Vec::new();
-    let mut stackCount = 0;
+    // Stack for the parser
+    let mut stack : Vec<lexer::Token> = Vec::new();
+    // Storing top of the stack
+    let mut stackIndex = 0;
+    // Token index
     let mut i = 0;
 
-    println!("Token Count: {}", tokenCount);
+    println!("Token Count: {}", tokenCount); // TODO: Remove it.
 
-    while i < tokenCount {
-        //println!("{:?}", tokenStream[i]);
-        i += 1;
+    loop {
+        // If token stream has ended, break the while loop.
+        if i == tokenCount {
+            break;
+        }
+
+        let topOfStack = &stack[stackIndex];
 
     }
 }
