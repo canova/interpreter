@@ -6,6 +6,7 @@ use std::env;
 
 mod lexer;
 mod parser;
+mod ast;
 
 fn main() {
 
@@ -19,7 +20,7 @@ fn main() {
     }
 
     let display = path.display();
-    
+
     let mut file = match File::open(&path) {
         // The `description` method of `io::Error` returns a string that
         // describes the error
@@ -34,13 +35,13 @@ fn main() {
         Ok(_) => print!("{} contains:\n{}", display, code),
     }
 
-    // Get Lexemes from the Lexer Module
-    let tokens = lexer::Initiate(code);
+    // Get Tokens from the Lexer Module
+    let tokens = lexer::new(code);
 
     // We have the Tokens list now. Printing for debugging
     for token in &tokens {
         println!("{:?}", token);
     }
 
-    let parseTree = parser::Initiate(tokens);
+    let parseTree = parser::parse(tokens);
 }

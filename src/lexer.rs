@@ -34,6 +34,12 @@ pub enum Token {
     Comment             // '//'
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct Span {
+    pub lo: usize,
+    pub hi: usize,
+}
+
 impl Token {
     pub fn toString(&self) -> String {
         match *self {
@@ -67,7 +73,7 @@ impl Token {
     }
 }
 
-pub fn Initiate(code: String) -> Vec<Token> {
+pub fn new(code: String) -> Vec<Token> {
     lexIt(code)
 }
 

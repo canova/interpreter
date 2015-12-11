@@ -4,29 +4,19 @@
  * Parser Module
  */
 
-use lexer;
+use lexer::*;
+use ast::*;
 
-pub enum TreeNode {
-    OperatorNode {leftNode: Option<Box<TreeNode>>, rightNode: Option<Box<TreeNode>>},
-    NumberNode {value: i64},
-    VariableNode(String),
-    StringNode(String)
-}
-
-pub fn Initiate(tokens: Vec<lexer::Token>) -> bool {
+pub fn parse(tokens: Vec<Token>) -> bool {
     parseIt(&tokens);
     false
 }
 
-fn parseIt(tokenStream: &Vec<lexer::Token>) {
-    // Total Token Count
-    let tokenCount = tokenStream.len();
-    // Stack for the parser
-    let mut stack : Vec<lexer::Token> = Vec::new();
-    // Storing top of the stack
-    let mut stackIndex = 0;
-    // Token index
-    let mut i = 0;
+fn parseIt(tokenStream: &Vec<Token>) {
+    let tokenCount = tokenStream.len(); // Total Token Count
+    let mut stack : Vec<Token> = Vec::new(); // Stack for the parser
+    let mut stackIndex = 0; // Storing top of the stack
+    let mut i = 0; // Token index
 
     println!("Token Count: {}", tokenCount); // TODO: Remove it.
 
@@ -36,7 +26,7 @@ fn parseIt(tokenStream: &Vec<lexer::Token>) {
             break;
         }
 
-        let topOfStack = &stack[stackIndex];
-
+        //let topOfStack = &stack[stackIndex];
+        i += 1;
     }
 }
