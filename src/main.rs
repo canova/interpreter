@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 use std::env;
+use lexer::*;
 
 mod lexer;
 mod parser;
@@ -36,12 +37,12 @@ fn main() {
     }
 
     // Get Tokens from the Lexer Module
-    let tokens = lexer::new(code);
+    let tokenStream = TokenStream::new(code);
 
-    // We have the Tokens list now. Printing for debugging
-    for token in &tokens {
+    // We have the TokenStream list now. Printing for debugging
+    for token in &tokenStream.tokens {
         println!("{:?}", token);
     }
 
-    let parseTree = parser::parse(tokens);
+    //let ast = parser::parse(tokens);
 }
