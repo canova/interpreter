@@ -4,8 +4,8 @@
  * Lexer Module
  */
 
-#[derive(Debug)]
-pub enum Token {
+#[derive(Debug, Clone)]
+pub enum TokenType {
     Keyword(String),    // like int, string or let
     Identifier(String), // like variable names
     Char(String),       // Char variables, inside " ' "
@@ -34,55 +34,69 @@ pub enum Token {
     Comment             // '//'
 }
 
+impl TokenType {
+
+    pub fn toString(&self) -> String {
+        match *self {
+            TokenType::Keyword(ref x) => format!("Keyword({})", x),
+            TokenType::Identifier(ref x) => format!("Identifier({})", x),
+            TokenType::Char(ref x) => format!("Char({})", x),
+            TokenType::String(ref x) => format!("String({})", x),
+            TokenType::Number(ref x) => format!("Number({})", x),
+            TokenType::True => "True".to_string(),
+            TokenType::False => "False".to_string(),
+            TokenType::Equals => "Equals".to_string(),
+            TokenType::Plus => "Plus".to_string(),
+            TokenType::Minus => "Minus".to_string(),
+            TokenType::Multiple => "Multiple".to_string(),
+            TokenType::Divide => "Divide".to_string(),
+            TokenType::Mod => "Mod".to_string(),
+            TokenType::Greater => "Greater".to_string(),
+            TokenType::Lesser => "Lesser".to_string(),
+            TokenType::GreaterEqual => "GreaterEqual".to_string(),
+            TokenType::LesserEqual => "LesserEqual".to_string(),
+            TokenType::LParen => "LParen".to_string(),
+            TokenType::RParen => "RParen".to_string(),
+            TokenType::LBrace => "LBrace".to_string(),
+            TokenType::RBrace => "RBrace".to_string(),
+            TokenType::LBracket => "LBracket".to_string(),
+            TokenType::RBracket => "RBracket".to_string(),
+            TokenType::Comma => "Comma".to_string(),
+            TokenType::Semicolon => "Semicolon".to_string(),
+            TokenType::Comment => "Comment".to_string()
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct Span {
     pub lo: usize,
     pub hi: usize,
 }
 
-impl Token {
-    pub fn toString(&self) -> String {
-        match *self {
-            Token::Keyword(ref x) => format!("Keyword({})", x),
-            Token::Identifier(ref x) => format!("Identifier({})", x),
-            Token::Char(ref x) => format!("Char({})", x),
-            Token::String(ref x) => format!("String({})", x),
-            Token::Number(ref x) => format!("Number({})", x),
-            Token::True => "True".to_string(),
-            Token::False => "False".to_string(),
-            Token::Equals => "Equals".to_string(),
-            Token::Plus => "Plus".to_string(),
-            Token::Minus => "Minus".to_string(),
-            Token::Multiple => "Multiple".to_string(),
-            Token::Divide => "Divide".to_string(),
-            Token::Mod => "Mod".to_string(),
-            Token::Greater => "Greater".to_string(),
-            Token::Lesser => "Lesser".to_string(),
-            Token::GreaterEqual => "GreaterEqual".to_string(),
-            Token::LesserEqual => "LesserEqual".to_string(),
-            Token::LParen => "LParen".to_string(),
-            Token::RParen => "RParen".to_string(),
-            Token::LBrace => "LBrace".to_string(),
-            Token::RBrace => "RBrace".to_string(),
-            Token::LBracket => "LBracket".to_string(),
-            Token::RBracket => "RBracket".to_string(),
-            Token::Comma => "Comma".to_string(),
-            Token::Semicolon => "Semicolon".to_string(),
-            Token::Comment => "Comment".to_string()
-        }
-    }
+#[derive(Debug, Clone)]
+pub struct Token {
+    pub tokenType : TokenType,
+    pub span : Option<Span>
+}
+
+pub struct TokenStream {
+    pub code: String,
+    pub tokens: Vec<Token>,
+    pub pos: i64,
+    pub curr: Option<char>
 }
 
 pub fn new(code: String) -> Vec<Token> {
-    lexIt(code)
+    tokenize(code)
 }
 
-fn lexIt(code: String) -> Vec<Token> {
+fn tokenize(code: String) -> Vec<Token> {
     let mut tokens : Vec<Token> = vec![]; // OR Vec::new();
     let charCount = code.chars().count();
     let mut i = 0;
 
-    while i <  charCount {
+    while i < charCount {
         let mut currentChar = code.chars().nth(i).unwrap();
 
         // If char is whitespace, just pass the current char
@@ -103,13 +117,13 @@ fn lexIt(code: String) -> Vec<Token> {
             //We have the word, now we need to find what it is and tokenize it.
             let tmpStr = tmp.to_lowercase();
             if isKeyword(&tmpStr) {
-                tokens.push(Token::Keyword(tmpStr));
+                tokens.push(Token { tokenType: TokenType::Keyword(tmpStr), span: None });
             } else if tmpStr == "true" {
-                tokens.push(Token::True);
+                tokens.push(Token {tokenType: TokenType::True, span: None });
             } else if tmpStr == "false" {
-                tokens.push(Token::False);
+                tokens.push(Token {tokenType: TokenType::False, span: None });
             } else {
-                tokens.push(Token::Identifier(tmpStr));
+                tokens.push(Token {tokenType: TokenType::Identifier(tmpStr), span: None });
             }
         }
         // If current char is a numerical character
@@ -121,7 +135,7 @@ fn lexIt(code: String) -> Vec<Token> {
                 i += 1;
             }
 
-            tokens.push(Token::Number(tmp));
+            tokens.push(Token { tokenType: TokenType::Number(tmp), span: None });
         }
         // If current char is a starting of a string
         else if currentChar == '"' {
@@ -134,7 +148,7 @@ fn lexIt(code: String) -> Vec<Token> {
             }
 
             i += 1;
-            tokens.push(Token::String(tmp));
+            tokens.push(Token { tokenType: TokenType::String(tmp), span: None });
         }
         // If current char is a real char
         else if currentChar == '\'' {
@@ -142,7 +156,7 @@ fn lexIt(code: String) -> Vec<Token> {
             i += 2;
 
             if code.chars().nth(i).unwrap() == '\'' {
-                tokens.push(Token::Char(tmp.to_string()));
+                tokens.push(Token { tokenType: TokenType::Char(tmp.to_string()), span: None });
                 i += 1;
             } else {
                 unexpectedToken(code.chars().nth(i).unwrap(), &code, i);
@@ -150,22 +164,22 @@ fn lexIt(code: String) -> Vec<Token> {
         }
         // If current char is an equals (=)
         else if currentChar == '=' {
-            tokens.push(Token::Equals);
+            tokens.push(Token { tokenType: TokenType::Equals, span: None });
             i += 1;
         }
         // If current char is a plus (+)
         else if currentChar == '+' {
-            tokens.push(Token::Plus);
+            tokens.push(Token { tokenType: TokenType::Plus, span: None });
             i += 1;
         }
         // If current char is a minus (-)
         else if currentChar == '-' {
-            tokens.push(Token::Minus);
+            tokens.push(Token { tokenType: TokenType::Minus, span: None });
             i += 1;
         }
         // If current char is a multiple (*)
         else if currentChar == '*' {
-            tokens.push(Token::Multiple);
+            tokens.push(Token { tokenType: TokenType::Multiple, span: None });
             i += 1;
         }
         // If current char is a divide (/) or comment ( starts with // )
@@ -178,23 +192,23 @@ fn lexIt(code: String) -> Vec<Token> {
                 }
 
                 i += 1;
-                tokens.push(Token::Comment);
+                tokens.push(Token { tokenType: TokenType::Comment, span: None });
             } else {
-                tokens.push(Token::Divide);
+                tokens.push(Token { tokenType: TokenType::Divide, span: None });
             }
         }
         // If current char is a mod (%)
         else if currentChar == '%' {
-            tokens.push(Token::Mod);
+            tokens.push(Token { tokenType: TokenType::Mod, span: None });
             i += 1;
         }
         // If current char is a greater than (>) or greater than or equal to (>=)
         else if currentChar == '>' {
             if i + 1 < charCount && code.chars().nth(i + 1).unwrap() == '=' {
-                tokens.push(Token::GreaterEqual);
+                tokens.push(Token { tokenType: TokenType::GreaterEqual, span: None });
                 i += 1;
             } else {
-                tokens.push(Token::Greater);
+                tokens.push(Token { tokenType: TokenType::Greater, span: None });
             }
 
             i += 1;
@@ -202,51 +216,51 @@ fn lexIt(code: String) -> Vec<Token> {
         // If current char is a lesser than (<) or lesser than or equal to (<=)
         else if currentChar == '<' {
             if i < charCount && code.chars().nth(i + 1).unwrap() == '=' {
-                tokens.push(Token::LesserEqual);
+                tokens.push(Token { tokenType: TokenType::LesserEqual, span: None });
                 i += 1;
             } else {
-                tokens.push(Token::Lesser);
+                tokens.push(Token { tokenType: TokenType::Lesser, span: None });
             }
             i += 1;
         }
         // If current char is an Open Paranthesis ( ( )
         else if currentChar == '(' {
-            tokens.push(Token::LParen);
+            tokens.push(Token { tokenType: TokenType::LParen, span: None });
             i += 1;
         }
         // If current char is a Close Paranthesis ( ) )
         else if currentChar == ')' {
-            tokens.push(Token::RParen);
+            tokens.push(Token { tokenType: TokenType::RParen, span: None });
             i += 1;
         }
         // If current char is an Open Braces ( { )
         else if currentChar == '{' {
-            tokens.push(Token::LBrace);
+            tokens.push(Token { tokenType: TokenType::LBrace, span: None });
             i += 1;
         }
         // If current char is a Close Braces ( } )
         else if currentChar == '}' {
-            tokens.push(Token::RBrace);
+            tokens.push(Token { tokenType: TokenType::RBrace, span: None });
             i += 1;
         }
         // If current char is an Open Brackets ( [ )
         else if currentChar == '[' {
-            tokens.push(Token::LBracket);
+            tokens.push(Token { tokenType: TokenType::LBracket, span: None });
             i += 1;
         }
         // If current char is a Close Brackets ( ] )
         else if currentChar == ']' {
-            tokens.push(Token::RBracket);
+            tokens.push(Token { tokenType: TokenType::RBracket, span: None });
             i += 1;
         }
         // If current char is an semicolon ( ; )
         else if currentChar == ',' {
-            tokens.push(Token::Comma);
+            tokens.push(Token { tokenType: TokenType::Comma, span: None });
             i += 1;
         }
         // If current char is an semicolon ( ; )
         else if currentChar == ';' {
-            tokens.push(Token::Semicolon);
+            tokens.push(Token { tokenType: TokenType::Semicolon, span: None });
             i += 1;
         }
         // Else throw an exception
@@ -257,6 +271,8 @@ fn lexIt(code: String) -> Vec<Token> {
 
     tokens
 }
+
+
 
 fn isKeyword(value: &String) -> bool {
     let valueStr = &*value;
