@@ -7,26 +7,47 @@
 use lexer::*;
 use ast::*;
 
-pub fn parse(tokens: Vec<Token>) -> bool {
-    parseIt(&tokens);
-    false
+pub struct Parser {
+    pub tokenStream: TokenStream,  // TokenStream
+    pub token: Token,              // Current token
+    pub span: Option<Span>,        // Span of current token
+    pub tokenCount: usize,         // Total token count of TokenStream
+    pub currentIndex: usize        // Current token index of TokenStream
 }
 
-fn parseIt(tokenStream: &Vec<Token>) {
-    let tokenCount = tokenStream.len(); // Total Token Count
-    let mut stack : Vec<Token> = Vec::new(); // Stack for the parser
-    let mut stackIndex = 0; // Storing top of the stack
-    let mut i = 0; // Token index
+impl Parser {
+    pub fn new(_tokenStream: TokenStream, _span: Option<Span>) -> Parser {
+        let _tokenCount = _tokenStream.tokens.len();
+        let _currentToken = _tokenStream.currentToken();
 
-    println!("Token Count: {}", tokenCount); // TODO: Remove it.
+        Parser {
+            tokenStream: _tokenStream,
+            token: _currentToken,
+            span: None,
+            tokenCount: _tokenCount,
+            currentIndex: 0
+        }
+    }
 
-    loop {
-        // If token stream has ended, break the while loop.
-        if i == tokenCount {
-            break;
+    pub fn tokenToString(&self) -> String {
+        self.token.tokenType.toString()
+    }
+
+    fn unexpectedToken(&self) { // TODO: Make more user friendly errors. It is temporary.
+        panic!("Unexpected token: {:?}", c);
+    }
+
+    fn eatToken(&mut self, expectedToken: &TokenType) -> bool {
+        let isExist = self.checkToken(expectedToken);
+        if isExist {
+            self.tokenStream.nextToken();
+            true
         }
 
-        //let topOfStack = &stack[stackIndex];
-        i += 1;
+        false
+    }
+
+    fn checkToken(&mut self, expectedToken: &TokenType) -> bool {
+        self.token.tokenType == *expectedToken
     }
 }

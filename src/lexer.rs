@@ -35,7 +35,6 @@ pub enum TokenType {
 }
 
 impl TokenType {
-
     pub fn toString(&self) -> String {
         match *self {
             TokenType::Keyword(ref x) => format!("Keyword({})", x),
@@ -76,8 +75,8 @@ pub struct Span {
 
 #[derive(Debug, Clone)]
 pub struct Token {
-    pub tokenType : TokenType,
-    pub span : Option<Span>
+    pub tokenType: TokenType,
+    pub span: Option<Span>
 }
 
 #[derive(Debug, Clone)]

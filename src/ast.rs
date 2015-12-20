@@ -23,7 +23,7 @@ pub enum Expr_ {
     // Divide two expressions
     Div(Box<Expr>, Box<Expr>),
     // Variable expression
-    Var(String),
+    Variable(String),
     // Assignment expression
     Assign(String, Box<Expr>),
     // If expression 'if expr { expr } else { expr }'
@@ -32,11 +32,4 @@ pub enum Expr_ {
     Print(Box<Expr>),
     // Literal expression
     Literal(i64)
-}
-
-pub enum Node {
-    OperatorNode {Children: Option<Vec<Node>>},
-    NumberNode {value: i64},
-    VariableNode {value: String},
-    StringNode {value: String}
 }
