@@ -3,7 +3,7 @@
  * Interpreter for Basic C like language
  * Parser Module
  */
-
+use std::string::String;
 use lexer::*;
 use ast::*;
 
@@ -33,21 +33,55 @@ impl Parser {
         self.token.tokenType.toString()
     }
 
-    fn unexpectedToken(&self) { // TODO: Make more user friendly errors. It is temporary.
+    fn unexpectedToken(&self, c: char) { // TODO: Make more user friendly errors. It is temporary.
         panic!("Unexpected token: {:?}", c);
     }
 
     fn eatToken(&mut self, expectedToken: &TokenType) -> bool {
         let isExist = self.checkToken(expectedToken);
+
         if isExist {
-            self.tokenStream.nextToken();
-            true
+            let result = self.advanceToken();
+            return true;
         }
 
-        false
+        return false;
     }
 
     fn checkToken(&mut self, expectedToken: &TokenType) -> bool {
         self.token.tokenType == *expectedToken
+    }
+
+    fn advanceToken(&mut self) -> bool {
+        self.currentIndex += 1;
+
+        if self.currentIndex == self.tokenCount {
+            return false;
+        }
+
+        self.token = self.tokenStream.nextToken();
+        return true;
+    }
+
+    pub fn parse(&mut self) -> Expr {
+
+        match self.token.tokenType {
+            TokenType::Keyword(String::from("int")) => Expr {span: None, node: self.parseInteger()},
+            TokenType::Keyword(String::from("string")) => Expr {span: None, node: self.parseString()},
+            TokenType::Keyword(String::from("print")) => Expr {span: None, node: self.parsePrint()},
+            _ => unimplemented!()
+        }
+    }
+
+    fn parseInteger(&self) {
+        unimplemented!()
+    }
+
+    fn parseString(&self) {
+        unimplemented!()
+    }
+
+    fn parsePrint(&self) {
+        unimplemented!()
     }
 }

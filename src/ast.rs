@@ -8,7 +8,7 @@ use lexer::*;
 
 #[derive(Debug)]
 pub struct Expr {
-    pub span: Span,
+    pub span: Option<Span>, // It is optional because it's unimplemented yet. Make it work.
     pub node: Expr_
 }
 
@@ -30,6 +30,8 @@ pub enum Expr_ {
     If(Box<Expr>, Box<Expr>, Option<Box<Expr>>),
     // Print expression
     Print(Box<Expr>),
+    // Get expression
+    Get(Box<Expr>),
     // Literal expression
     Literal(i64)
 }
