@@ -31,38 +31,40 @@ pub enum TokenType {
     RBracket,           // ]
     Comma,              // ,
     Semicolon,          // ;
-    Comment             // '//'
+    Comment,            // '//'
+    EOF                 // End of File
 }
 
 impl TokenType {
-    pub fn toString(&self) -> String {
+    pub fn toString(&self) -> &str {
         match *self {
-            TokenType::Keyword(ref x) => format!("Keyword({})", x),
-            TokenType::Identifier(ref x) => format!("Identifier({})", x),
-            TokenType::Char(ref x) => format!("Char({})", x),
-            TokenType::String(ref x) => format!("String({})", x),
-            TokenType::Number(ref x) => format!("Number({})", x),
-            TokenType::True => "True".to_string(),
-            TokenType::False => "False".to_string(),
-            TokenType::Equals => "Equals".to_string(),
-            TokenType::Plus => "Plus".to_string(),
-            TokenType::Minus => "Minus".to_string(),
-            TokenType::Multiple => "Multiple".to_string(),
-            TokenType::Divide => "Divide".to_string(),
-            TokenType::Mod => "Mod".to_string(),
-            TokenType::Greater => "Greater".to_string(),
-            TokenType::Lesser => "Lesser".to_string(),
-            TokenType::GreaterEqual => "GreaterEqual".to_string(),
-            TokenType::LesserEqual => "LesserEqual".to_string(),
-            TokenType::LParen => "LParen".to_string(),
-            TokenType::RParen => "RParen".to_string(),
-            TokenType::LBrace => "LBrace".to_string(),
-            TokenType::RBrace => "RBrace".to_string(),
-            TokenType::LBracket => "LBracket".to_string(),
-            TokenType::RBracket => "RBracket".to_string(),
-            TokenType::Comma => "Comma".to_string(),
-            TokenType::Semicolon => "Semicolon".to_string(),
-            TokenType::Comment => "Comment".to_string()
+            TokenType::Keyword(ref x) => "Keyword",
+            TokenType::Identifier(ref x) => "Identifier",
+            TokenType::Char(ref x) => "Char",
+            TokenType::String(ref x) => "String",
+            TokenType::Number(ref x) => "Number",
+            TokenType::True => "True",
+            TokenType::False => "False",
+            TokenType::Equals => "Equals",
+            TokenType::Plus => "Plus",
+            TokenType::Minus => "Minus",
+            TokenType::Multiple => "Multiple",
+            TokenType::Divide => "Divide",
+            TokenType::Mod => "Mod",
+            TokenType::Greater => "Greater",
+            TokenType::Lesser => "Lesser",
+            TokenType::GreaterEqual => "GreaterEqual",
+            TokenType::LesserEqual => "LesserEqual",
+            TokenType::LParen => "LParen",
+            TokenType::RParen => "RParen",
+            TokenType::LBrace => "LBrace",
+            TokenType::RBrace => "RBrace",
+            TokenType::LBracket => "LBracket",
+            TokenType::RBracket => "RBracket",
+            TokenType::Comma => "Comma",
+            TokenType::Semicolon => "Semicolon",
+            TokenType::Comment => "Comment",
+            TokenType::EOF => "EOF"
         }
     }
 }
@@ -277,6 +279,8 @@ impl TokenStream {
                 self.unexpectedToken(currentChar, i);
             }
         }
+        // End od file Token
+        tokens.push(Token {tokenType: TokenType::EOF, span: None});
 
         self.tokens = tokens;
     }

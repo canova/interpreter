@@ -4,6 +4,7 @@ use std::io::prelude::*;
 use std::path::Path;
 use std::env;
 use lexer::*;
+use parser::*;
 
 mod lexer;
 mod parser;
@@ -44,5 +45,7 @@ fn main() {
         println!("{:?}", token);
     }
 
-    //let ast = parser::parse(tokens);
+    let mut parser = Parser::new(tokenStream, None);
+    let ast = parser.parse();
+    
 }

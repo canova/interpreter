@@ -29,76 +29,91 @@ impl Parser {
         }
     }
 
-    pub fn tokenToString(&self) -> String {
+    pub fn tokenToString(&self) -> &str {
         self.token.tokenType.toString()
     }
 
-    fn unexpectedToken(&self, tt: TokenType) { // TODO: Make more user friendly errors. It is temporary.
-        panic!("Unexpected token found. Found: {:?}", tt);
+    fn unexpectedToken(&self, ut: &str) { // TODO: Make more user friendly errors. It is temporary.
+        panic!("Unexpected token found. Expected: {:?}", ut);
     }
 
-    fn eatToken(&mut self, expectedToken: TokenType) -> bool {
+    fn eatToken(&mut self, expectedToken: &str) -> bool {
         let isExist = self.checkToken(expectedToken);
 
         if isExist {
             let result = self.advanceToken();
-            return true;
+            true
+        } else {
+            false
         }
-
-        return false;
     }
 
-    fn checkToken(&mut self, expectedToken: &TokenType) -> bool {
-        self.token.tokenType == *expectedToken
+    fn checkToken(&self, expectedToken: &str) -> bool {
+        self.tokenStream.tokens[self.currentIndex + 1].tokenType.toString() == expectedToken
     }
 
     fn advanceToken(&mut self) -> bool {
         self.currentIndex += 1;
 
         if self.currentIndex == self.tokenCount {
-            return false;
-        }
-
-        self.token = self.tokenStream.nextToken();
-        return true;
-    }
-
-    pub fn parse(&mut self) -> Expr {
-
-        match self.token.tokenType {
-            TokenType::Keyword(ref x) if x == "int" => Expr {span: None, node: self.parseInteger()},
-            TokenType::Keyword(ref x) if x == "string" => Expr {span: None, node: self.parseString()},
-            TokenType::Keyword(ref x) if x == "print" => Expr {span: None, node: self.parsePrint()},
-            _ => unimplemented!()
+            false
+        } else {
+            self.token = self.tokenStream.nextToken();
+            true
         }
     }
 
-    fn parseInteger(&self) -> Expr_ {
+    pub fn parse(&mut self) -> Vec<Box<Expr>> {
+
+        let mut program: Vec<Box<Expr>>= vec![];
+
+        while self.currentIndex < self.tokenCount {
+            let stmt = match self.token.tokenType.clone() {
+                TokenType::Keyword(ref x) if x == "int" => Box::new(Expr {span: None, node: self.parseInteger()}),
+                TokenType::Keyword(ref x) if x == "string" => Box::new(Expr {span: None, node: self.parseString()}),
+                TokenType::Keyword(ref x) if x == "print" => Box::new(Expr {span: None, node: self.parsePrint()}),
+                TokenType::EOF => { Box::new(Expr {span: None, node: Expr_::EOF}); break }
+                _ => { self.unexpectedToken(self.token.tokenType.toString()); Box::new(Expr {span: None, node: Expr_::Nil}) }
+            };
+            program.push(stmt);
+        }
+
+        program
+    }
+
+    fn parseInteger(&mut self) -> Expr_ {
         let identifier : String;
         let number : String;
-        let mut expr : Expr;
+        let mut expr : Expr_;
 
-        if self.eatToken(TokenType::Identifier) {
+        if self.eatToken("Identifier") {
             match self.token.tokenType {
-                TokenType::Identifier(ref x) => identifier = x
+                TokenType::Identifier(ref x) => identifier = x.clone(),
+                _ => unimplemented!()
             };
 
-            if self.eatToken(TokenType::Equals) {
-                if self.eatToken(TokenType::Number) {
-                    match self.token.tokenType {
+            if self.eatToken("Equals") {
+                if self.eatToken("Number") {
+                    match self.token.tokenType.clone() {
                         TokenType::Number(ref y) => {
-                            number = y;
-                            expr = Expr_::Assign {Identifier, Expr {span None, node: Expr_::Variable {number}}};
-                        };
+                            number = y.clone();
+                            expr = Expr_::Assign (
+                                identifier,
+                                Box::new(Expr {span: None, node: Expr_::Variable (number)})
+                            );
+                            self.expectSemicolon();
+                            return expr;
+                        },
+                        _ => unimplemented!()
                     };
-
                 }
             } else {
-                self.unexpectedToken(TokenType::Equals);
+                self.unexpectedToken("Equals");
             }
         } else {
-            self.unexpectedToken(TokenType::Identifier);
+            self.unexpectedToken("Identifier");
         }
+        Expr_::Nil
     }
 
     fn parseString(&self) -> Expr_ {
@@ -109,9 +124,11 @@ impl Parser {
         unimplemented!()
     }
 
-    fn expectSemicolon(&self) {
-        if self.eatToken(TokenType::Semicolon) {
-            self.unexpectedToken(TokenType::Semicolon);
+    fn expectSemicolon(&mut self) {
+        if self.eatToken("Semicolon") {
+            self.advanceToken();
+        } else {
+            self.unexpectedToken("Semicolon");
         }
     }
 }

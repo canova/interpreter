@@ -14,6 +14,8 @@ pub struct Expr {
 
 #[derive(Debug)]
 pub enum Expr_ {
+    //Program statements
+    Program(Vec<Box<Expr>>),
     // Add two expressions.
     Add(Box<Expr>, Box<Expr>),
     // Subtract two expressions
@@ -33,5 +35,9 @@ pub enum Expr_ {
     // Get expression
     Get(Box<Expr>),
     // Literal expression
-    Literal(i64)
+    Literal(i64),
+    // End of File
+    EOF,
+    // Null
+    Nil
 }
