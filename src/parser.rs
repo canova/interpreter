@@ -63,27 +63,28 @@ impl Parser {
         }
     }
 
-    pub fn parse(&mut self) -> Vec<Box<Expr>> {
+    pub fn parse(&mut self) -> Box<Expr> {
 
-        let mut program: Vec<Box<Expr>>= vec![];
+        let mut block: Vec<Box<Expr>>= vec![];
 
         while self.currentIndex < self.tokenCount {
             let stmt = match self.token.tokenType.clone() {
                 TokenType::Keyword(ref x) if x == "int" => Box::new(Expr {span: None, node: self.parseInteger()}),
                 TokenType::Keyword(ref x) if x == "string" => Box::new(Expr {span: None, node: self.parseString()}),
+                TokenType::Keyword(ref x) if x == "bool" => Box::new(Expr {span: None, node: self.parseBool()}),
                 TokenType::Keyword(ref x) if x == "print" => Box::new(Expr {span: None, node: self.parsePrint()}),
-                TokenType::EOF => { Box::new(Expr {span: None, node: Expr_::EOF}); break }
+                TokenType::EOF => { block.push(Box::new(Expr {span: None, node: Expr_::EOF})); break }
                 _ => { self.unexpectedToken(self.token.tokenType.toString()); Box::new(Expr {span: None, node: Expr_::Nil}) }
             };
-            program.push(stmt);
+            block.push(stmt);
         }
 
-        program
+        Box::new(Expr {span: None, node: Expr_::Block(block)})
     }
 
     fn parseInteger(&mut self) -> Expr_ {
         let identifier : String;
-        let number : String;
+        let number : i64;
         let mut expr : Expr_;
 
         if self.eatToken("Identifier") {
@@ -96,10 +97,10 @@ impl Parser {
                 if self.eatToken("Number") {
                     match self.token.tokenType.clone() {
                         TokenType::Number(ref y) => {
-                            number = y.clone();
+                            number = y.parse::<i64>().unwrap();
                             expr = Expr_::Assign (
                                 identifier,
-                                Box::new(Expr {span: None, node: Expr_::Variable (number)})
+                                Box::new(Expr {span: None, node: Expr_::Variable (Constant::Integer(number))})
                             );
                             self.expectSemicolon();
                             return expr;
@@ -116,8 +117,73 @@ impl Parser {
         Expr_::Nil
     }
 
-    fn parseString(&self) -> Expr_ {
-        unimplemented!()
+    fn parseString(&mut self) -> Expr_ {
+        let identifier : String;
+        let string : String;
+        let mut expr : Expr_;
+
+        if self.eatToken("Identifier") {
+            match self.token.tokenType {
+                TokenType::Identifier(ref x) => identifier = x.clone(),
+                _ => unimplemented!()
+            };
+
+            if self.eatToken("Equals") {
+                if self.eatToken("String") {
+                    match self.token.tokenType.clone() {
+                        TokenType::String(ref y) => {
+                            string = y.clone();
+                            expr = Expr_::Assign (
+                                identifier,
+                                Box::new(Expr {span: None, node: Expr_::Variable (Constant::String(string))})
+                            );
+                            self.expectSemicolon();
+                            return expr;
+                        },
+                        _ => unimplemented!()
+                    };
+                }
+            } else {
+                self.unexpectedToken("Equals");
+            }
+        } else {
+            self.unexpectedToken("Identifier");
+        }
+        Expr_::Nil
+    }
+
+    fn parseBool(&mut self) -> Expr_ {
+        let identifier : String;
+        let boolVal : bool;
+        let mut expr : Expr_;
+
+        if self.eatToken("Identifier") {
+            match self.token.tokenType {
+                TokenType::Identifier(ref x) => identifier = x.clone(),
+                _ => unimplemented!()
+            };
+
+            if self.eatToken("Equals") {
+                if self.eatToken("True") || self.eatToken("False"){
+                    match self.token.tokenType.clone() {
+                        TokenType::True => boolVal = true,
+                        TokenType::False => boolVal = false,
+                        _ => unimplemented!()
+                    };
+                    expr = Expr_::Assign (
+                        identifier,
+                        Box::new(Expr {span: None, node: Expr_::Variable (Constant::Bool(boolVal))})
+                    );
+                    self.expectSemicolon();
+                    return expr;
+                }
+            } else {
+                self.unexpectedToken("Equals");
+            }
+        } else {
+            self.unexpectedToken("Identifier");
+        }
+        Expr_::Nil
     }
 
     fn parsePrint(&self) -> Expr_ {

@@ -14,8 +14,8 @@ pub struct Expr {
 
 #[derive(Debug)]
 pub enum Expr_ {
-    //Program statements
-    Program(Vec<Box<Expr>>),
+    //Block of statements
+    Block(Vec<Box<Expr>>),
     // Add two expressions.
     Add(Box<Expr>, Box<Expr>),
     // Subtract two expressions
@@ -25,7 +25,7 @@ pub enum Expr_ {
     // Divide two expressions
     Div(Box<Expr>, Box<Expr>),
     // Variable expression
-    Variable(String),
+    Variable(Constant),
     // Assignment expression
     Assign(String, Box<Expr>),
     // If expression 'if expr { expr } else { expr }'
@@ -40,4 +40,11 @@ pub enum Expr_ {
     EOF,
     // Null
     Nil
+}
+
+#[derive(Debug)]
+pub enum Constant {
+    String(String),
+    Integer(i64),
+    Bool(bool)
 }
