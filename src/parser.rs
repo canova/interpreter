@@ -1,4 +1,3 @@
-
 /*
  * Interpreter for Basic C like language
  * Parser Module
@@ -34,7 +33,8 @@ impl Parser {
     }
 
     fn unexpectedToken(&self, ut: &str) { // TODO: Make more user friendly errors. It is temporary.
-        panic!("Unexpected token found. Expected: {:?}", ut);
+        panic!("Unexpected token found. Expected: {:?}, Found: {:?} instead.", ut,
+                self.tokenStream.tokens[self.currentIndex + 1].tokenType.toString());
     }
 
     fn eatToken(&mut self, expectedToken: &str) -> bool {
@@ -72,10 +72,18 @@ impl Parser {
                 TokenType::Keyword(ref x) if x == "int" => Box::new(Expr {span: None, node: self.parseInteger()}),
                 TokenType::Keyword(ref x) if x == "string" => Box::new(Expr {span: None, node: self.parseString()}),
                 TokenType::Keyword(ref x) if x == "bool" => Box::new(Expr {span: None, node: self.parseBool()}),
-                TokenType::Keyword(ref x) if x == "print" => Box::new(Expr {span: None, node: self.parsePrint()}),
+                TokenType::Identifier(ref x) => {
+                    if self.eatToken("LParen") {
+                        Box::new(Expr {span: None, node: self.parseCall(x.clone())})
+                    } else {
+                        self.unexpectedToken("LParen");
+                        unimplemented!();
+                    }
+                },
                 TokenType::EOF => { block.push(Box::new(Expr {span: None, node: Expr_::EOF})); break }
                 _ => { self.unexpectedToken(self.token.tokenType.toString()); Box::new(Expr {span: None, node: Expr_::Nil}) }
             };
+
             block.push(stmt);
         }
 
@@ -100,7 +108,7 @@ impl Parser {
                             number = y.parse::<i64>().unwrap();
                             expr = Expr_::Assign (
                                 identifier,
-                                Box::new(Expr {span: None, node: Expr_::Variable (Constant::Integer(number))})
+                                Box::new(Expr {span: None, node: Expr_::Constant (Constant::Integer(number))})
                             );
                             self.expectSemicolon();
                             return expr;
@@ -135,7 +143,7 @@ impl Parser {
                             string = y.clone();
                             expr = Expr_::Assign (
                                 identifier,
-                                Box::new(Expr {span: None, node: Expr_::Variable (Constant::String(string))})
+                                Box::new(Expr {span: None, node: Expr_::Constant (Constant::String(string))})
                             );
                             self.expectSemicolon();
                             return expr;
@@ -172,7 +180,7 @@ impl Parser {
                     };
                     expr = Expr_::Assign (
                         identifier,
-                        Box::new(Expr {span: None, node: Expr_::Variable (Constant::Bool(boolVal))})
+                        Box::new(Expr {span: None, node: Expr_::Constant (Constant::Bool(boolVal))})
                     );
                     self.expectSemicolon();
                     return expr;
@@ -186,8 +194,50 @@ impl Parser {
         Expr_::Nil
     }
 
-    fn parsePrint(&self) -> Expr_ {
-        unimplemented!()
+    fn parseCall(&mut self, identifier: String) -> Expr_ {
+        let mut string : String;
+        let mut expr : Expr_;
+        let mut params: Vec<Box<Expr>> = vec![];
+
+        // Do While loop for parameters
+        while {
+            if self.eatToken("String") {
+                match self.token.tokenType {
+                    TokenType::String(ref x) => string = x.clone(),
+                    _ => unimplemented!()
+                };
+
+                let boxedExpr = Box::new(Expr {span: None, node: Expr_::Constant(Constant::String(string))});
+                params.push(boxedExpr);
+
+            } else if self.eatToken("Identifier") {
+                match self.token.tokenType {
+                    TokenType::Identifier(ref x) => string = x.clone(),
+                    _ => unimplemented!()
+                };
+
+                let boxedExpr = Box::new(Expr {span: None, node: Expr_::Variable(string)});
+                params.push(boxedExpr);
+
+            } else {
+                self.unexpectedToken("Identifier or String");
+            }
+
+            self.eatToken("Comma") // Logical check for do while loop
+        } {}
+
+        expr = Expr_::Call (
+            identifier,
+            params
+        );
+
+        if self.eatToken("RParen") {
+            self.expectSemicolon();
+            return expr;
+        } else {
+            self.unexpectedToken("RParen");
+            return Expr_::Nil;
+        }
     }
 
     fn expectSemicolon(&mut self) {

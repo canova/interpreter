@@ -11,18 +11,18 @@ mod parser;
 mod ast;
 
 fn main() {
-
     let args: Vec<_> = env::args().collect();
     let mut path = Path::new("src/test/main.c");
+    let mut code = String::new();
+    let display = path.display();
 
-    // For custom test source file for interpreting.
+    // For custom source file for interpreting.
     if args.len() > 1 {
         println!("Your source file is: {}", args[1]);
         path = Path::new(&*args[1]);
     }
 
-    let display = path.display();
-
+    // Open the source file.
     let mut file = match File::open(&path) {
         // The `description` method of `io::Error` returns a string that
         // describes the error
@@ -30,8 +30,7 @@ fn main() {
         Ok(file) => file,
     };
 
-    let mut code = String::new();
-
+    // Read the source file and if it is success pass it to code variable. Otherwise, give error.
     match file.read_to_string(&mut code) {
         Err(why) => panic!("couldn't read {}: {}", display, Error::description(&why)),
         Ok(_) => print!("{} contains:\n{}", display, code),
@@ -45,7 +44,9 @@ fn main() {
         println!("{:?}", token);
     }
 
+    // Creating a new Parser instance for AST.
     let mut parser = Parser::new(tokenStream, None);
+    // Parsing Token Stream and returning the AST.
     let ast = parser.parse();
     
 }

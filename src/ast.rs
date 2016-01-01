@@ -1,4 +1,3 @@
-
 /*
  * Interpreter for Basic C like language
  * AST(Abstract Syntax Tree) Module
@@ -25,15 +24,15 @@ pub enum Expr_ {
     // Divide two expressions
     Div(Box<Expr>, Box<Expr>),
     // Variable expression
-    Variable(Constant),
+    Variable(String),
+    // Constant expression
+    Constant(Constant),
     // Assignment expression
     Assign(String, Box<Expr>),
     // If expression 'if expr { expr } else { expr }'
     If(Box<Expr>, Box<Expr>, Option<Box<Expr>>),
-    // Print expression
-    Print(Box<Expr>),
-    // Get expression
-    Get(Box<Expr>),
+    // Function Call, first field is name of the function, second is list of arguments
+    Call(String, Vec<Box<Expr>>),
     // Literal expression
     Literal(i64),
     // End of File

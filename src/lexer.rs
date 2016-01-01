@@ -1,4 +1,3 @@
-
 /*
  * Interpreter for Basic C like language
  * Lexer Module
@@ -287,7 +286,7 @@ impl TokenStream {
 
     fn isKeyword (&self, value: &String) -> bool {
         let valueStr = &*value;
-        value == "main" || value == "int" || value == "string" || value == "bool" || value == "print" || value == "get" || value == "return"
+        value == "main" || value == "int" || value == "string" || value == "bool" || value == "return"
     }
 
     fn unexpectedToken (&self, c: char, i: usize) {
