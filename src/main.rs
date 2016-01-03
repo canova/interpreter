@@ -9,6 +9,7 @@ use parser::*;
 mod lexer;
 mod parser;
 mod ast;
+mod interpreter;
 
 fn main() {
     let args: Vec<_> = env::args().collect();
