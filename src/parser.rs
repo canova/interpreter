@@ -20,6 +20,7 @@ impl Parser {
         let _tokenCount = _tokenStream.tokens.len();
         let _currentToken = _tokenStream.currentToken();
 
+        // Create new parser for parsing process
         Parser {
             tokenStream: _tokenStream,
             token: _currentToken,
@@ -41,6 +42,7 @@ impl Parser {
     fn eatToken(&mut self, expectedToken: &str) -> bool {
         let isExist = self.checkToken(expectedToken);
 
+        // If there is a token next, advance token and return true, otherwise return false.
         if isExist {
             let result = self.advanceToken();
             true
@@ -56,6 +58,7 @@ impl Parser {
     fn advanceToken(&mut self) -> bool {
         self.currentIndex += 1;
 
+        // If have next token get next token and return true otherwise return false.
         if self.currentIndex == self.tokenCount {
             false
         } else {
@@ -65,15 +68,17 @@ impl Parser {
     }
 
     pub fn parse(&mut self) -> Box<Expr> {
-
         let mut block: Vec<Box<Expr>>= vec![];
 
+        // Read all tokens and create statements, then push it to the block.
         while self.currentIndex < self.tokenCount {
+            // Determine the parse type for current or (if not enough) next token.
             let stmt = match self.token.tokenType.clone() {
                 TokenType::Keyword(ref x) if x == "int" => Box::new(Expr {span: None, node: self.parseInteger()}),
                 TokenType::Keyword(ref x) if x == "string" => Box::new(Expr {span: None, node: self.parseString()}),
                 TokenType::Keyword(ref x) if x == "bool" => Box::new(Expr {span: None, node: self.parseBool()}),
                 TokenType::Identifier(ref x) => {
+                    // Eat LParen
                     if self.eatToken("LParen") {
                         Box::new(Expr {span: None, node: self.parseCall(x.clone())})
                     } else {
@@ -88,6 +93,7 @@ impl Parser {
             block.push(stmt);
         }
 
+        // Return Boxed block statement.
         Box::new(Expr {span: None, node: Expr_::Block(block)})
     }
 
@@ -96,14 +102,18 @@ impl Parser {
         let number : i64;
         let mut expr : Expr_;
 
+        // Eat identifier
         if self.eatToken("Identifier") {
             match self.token.tokenType {
                 TokenType::Identifier(ref x) => identifier = x.clone(),
                 _ => unimplemented!()
             };
 
+            // Eat equal symbol (=)
             if self.eatToken("Equals") {
+                // Eat number
                 if self.eatToken("Number") {
+                    // Create an expression and return it.
                     match self.token.tokenType.clone() {
                         TokenType::Number(ref y) => {
                             number = y.parse::<i64>().unwrap();
@@ -123,6 +133,7 @@ impl Parser {
         } else {
             self.unexpectedToken("Identifier");
         }
+
         Expr_::Nil
     }
 
@@ -131,14 +142,18 @@ impl Parser {
         let string : String;
         let mut expr : Expr_;
 
+        // Eat identifier
         if self.eatToken("Identifier") {
             match self.token.tokenType {
                 TokenType::Identifier(ref x) => identifier = x.clone(),
                 _ => unimplemented!()
             };
 
+            // Eat equal symbol (=)
             if self.eatToken("Equals") {
+                // Eat String
                 if self.eatToken("String") {
+                    // Create an expression and return it.
                     match self.token.tokenType.clone() {
                         TokenType::String(ref y) => {
                             string = y.clone();
@@ -158,6 +173,7 @@ impl Parser {
         } else {
             self.unexpectedToken("Identifier");
         }
+
         Expr_::Nil
     }
 
@@ -166,14 +182,18 @@ impl Parser {
         let boolVal : bool;
         let mut expr : Expr_;
 
+        // Eat identifier
         if self.eatToken("Identifier") {
             match self.token.tokenType {
                 TokenType::Identifier(ref x) => identifier = x.clone(),
                 _ => unimplemented!()
             };
 
+            // Eat equal symbol (=)
             if self.eatToken("Equals") {
+                // Eat True or False value
                 if self.eatToken("True") || self.eatToken("False"){
+                    // Create an expression and return it.
                     match self.token.tokenType.clone() {
                         TokenType::True => boolVal = true,
                         TokenType::False => boolVal = false,
@@ -192,6 +212,7 @@ impl Parser {
         } else {
             self.unexpectedToken("Identifier");
         }
+
         Expr_::Nil
     }
 
@@ -202,7 +223,9 @@ impl Parser {
 
         // Do While loop for parameters
         while {
+            // Eat String
             if self.eatToken("String") {
+                // Create an expression and return it.
                 match self.token.tokenType {
                     TokenType::String(ref x) => string = x.clone(),
                     _ => unimplemented!()
@@ -211,7 +234,10 @@ impl Parser {
                 let boxedExpr = Box::new(Expr {span: None, node: Expr_::Constant(Constant::String(string))});
                 params.push(boxedExpr);
 
-            } else if self.eatToken("Identifier") {
+            }
+            // Eat identifier
+            else if self.eatToken("Identifier") {
+                // Create an expression and return it.
                 match self.token.tokenType {
                     TokenType::Identifier(ref x) => string = x.clone(),
                     _ => unimplemented!()
@@ -232,6 +258,7 @@ impl Parser {
             params
         );
 
+        // Eat RParen
         if self.eatToken("RParen") {
             self.expectSemicolon();
             return expr;

@@ -278,6 +278,7 @@ impl TokenStream {
                 self.unexpectedToken(currentChar, i);
             }
         }
+        
         // End od file Token
         tokens.push(Token {tokenType: TokenType::EOF, span: None});
 
@@ -313,6 +314,7 @@ impl TokenStream {
 
     pub fn nextToken (&mut self) -> Token {
         self.pos += 1;
+
         loop {
             if self.tokens[self.pos].tokenType == TokenType::Comment {
                 self.pos += 1;
