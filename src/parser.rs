@@ -7,6 +7,7 @@ use std::string::String;
 use lexer::*;
 use ast::*;
 
+#[derive(Clone)]
 pub struct Parser {
     pub tokenStream: TokenStream,  // TokenStream
     pub token: Token,              // Current token

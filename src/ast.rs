@@ -5,13 +5,13 @@
 
 use lexer::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Expr {
     pub span: Option<Span>, // It is optional because it's unimplemented yet. Make it work.
     pub node: Expr_
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Expr_ {
     //Block of statements
     Block(Vec<Box<Expr>>),
@@ -41,7 +41,7 @@ pub enum Expr_ {
     Nil
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Constant {
     String(String),
     Integer(i64),

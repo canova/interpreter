@@ -5,6 +5,7 @@ use std::path::Path;
 use std::env;
 use lexer::*;
 use parser::*;
+use interpreter::*;
 
 mod lexer;
 mod parser;
@@ -47,7 +48,8 @@ fn main() {
 
     // Creating a new Parser instance for AST.
     let mut parser = Parser::new(tokenStream, None);
-    // Parsing Token Stream and returning the AST.
-    let ast = parser.parse();
-    
+
+    // Creating an interpreter module for program.
+    let mut program = Interpreter::new(parser);
+    program.run();
 }
