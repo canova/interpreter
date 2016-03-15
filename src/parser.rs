@@ -45,8 +45,7 @@ impl Parser {
 
         // If there is a token next, advance token and return true, otherwise return false.
         if isExist {
-            let result = self.advanceToken();
-            true
+            self.advanceToken()
         } else {
             false
         }
@@ -73,6 +72,13 @@ impl Parser {
 
         // Read all tokens and create statements, then push it to the block.
         while self.currentIndex < self.tokenCount {
+
+            // Ignore the current token if it is useless.
+            if self.token.tokenType == TokenType::Comment {
+                self.advanceToken();
+                continue;
+            }
+
             // Determine the parse type for current or (if not enough) next token.
             let stmt = match self.token.tokenType.clone() {
                 TokenType::Keyword(ref x) if x == "int" => Box::new(Expr {span: None, node: self.parseInteger()}),
@@ -87,7 +93,7 @@ impl Parser {
                         unimplemented!();
                     }
                 },
-                TokenType::EOF => { block.push(Box::new(Expr {span: None, node: Expr_::EOF})); break }
+                TokenType::EOF => { block.push(Box::new(Expr {span: None, node: Expr_::EOF})); break },
                 _ => { self.unexpectedToken(self.token.tokenType.toString()); Box::new(Expr {span: None, node: Expr_::Nil}) }
             };
 
@@ -101,7 +107,7 @@ impl Parser {
     fn parseInteger(&mut self) -> Expr_ {
         let identifier : String;
         let number : i64;
-        let mut expr : Expr_;
+        let expr : Expr_;
 
         // Eat identifier
         if self.eatToken("Identifier") {
@@ -141,7 +147,7 @@ impl Parser {
     fn parseString(&mut self) -> Expr_ {
         let identifier : String;
         let string : String;
-        let mut expr : Expr_;
+        let expr : Expr_;
 
         // Eat identifier
         if self.eatToken("Identifier") {
@@ -181,7 +187,7 @@ impl Parser {
     fn parseBool(&mut self) -> Expr_ {
         let identifier : String;
         let boolVal : bool;
-        let mut expr : Expr_;
+        let expr : Expr_;
 
         // Eat identifier
         if self.eatToken("Identifier") {
@@ -219,7 +225,7 @@ impl Parser {
 
     fn parseCall(&mut self, identifier: String) -> Expr_ {
         let mut string : String;
-        let mut expr : Expr_;
+        let expr : Expr_;
         let mut params: Vec<Box<Expr>> = vec![];
 
         // Do While loop for parameters

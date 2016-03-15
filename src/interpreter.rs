@@ -4,8 +4,8 @@
  */
 
 use std::collections::HashMap;
+use std::io::{self, BufRead};
 
-use lexer::*;
 use ast::*;
 use parser::*;
 
@@ -42,8 +42,8 @@ impl Interpreter {
         }
     }
 
-    fn interpretAssign (&mut self, mut identifier: &String,mut value: &Box<Expr>) {
-        let mut insertVal: String;
+    fn interpretAssign (&mut self, identifier: &String, value: &Box<Expr>) {
+        let insertVal: String;
 
         match value.node {
             Expr_::Constant(ref constant) => {
@@ -60,9 +60,11 @@ impl Interpreter {
         self.variables.insert(identifier.to_owned(), insertVal);
     }
 
-    fn interpretCall (&mut self, mut identifier: &String, params: &Vec<Box<Expr>>) {
+    fn interpretCall (&mut self, identifier: &String, params: &Vec<Box<Expr>>) {
         if identifier == "print" {
             self.print(params.to_owned());
+        } else if identifier == "get" {
+            self.get(params.to_owned());
         }
     }
 
@@ -85,11 +87,26 @@ impl Interpreter {
                         None => println!("{:?} variable not found!", var)
                     }
                 },
-                
+
                 _ => println!("Other type of node found!")
             }
         }
 
         println!("{}", output);
+    }
+
+    fn get(&mut self, params: Vec<Box<Expr>>) {
+        let stdin = io::stdin();
+        let line = stdin.lock().lines().next().unwrap().unwrap();
+
+        for param in params {
+            match param.node {
+                Expr_::Variable(ref var) => {
+                    self.variables.insert(var.to_owned(), line.clone());
+                },
+
+                _ => println!("Parameter requires a variable identifier!")
+            }
+        }
     }
 }

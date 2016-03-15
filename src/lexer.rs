@@ -107,7 +107,7 @@ impl TokenStream {
         let mut i = 0;
 
         while i < charCount {
-            let mut currentChar = self.nthChar(i);
+            let currentChar = self.code.chars().nth(i).unwrap();
 
             // If char is whitespace, just pass the current char
             if currentChar.is_whitespace() {
@@ -278,7 +278,7 @@ impl TokenStream {
                 self.unexpectedToken(currentChar, i);
             }
         }
-        
+
         // End od file Token
         tokens.push(Token {tokenType: TokenType::EOF, span: None});
 

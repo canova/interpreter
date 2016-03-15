@@ -35,19 +35,14 @@ fn main() {
     // Read the source file and if it is success pass it to code variable. Otherwise, give error.
     match file.read_to_string(&mut code) {
         Err(why) => panic!("couldn't read {}: {}", display, Error::description(&why)),
-        Ok(_) => print!("{} contains:\n{}", display, code),
+        Ok(_) => print!("\n")
     }
 
     // Get Tokens from the Lexer Module
     let tokenStream = TokenStream::new(code);
 
-    // We have the TokenStream list now. Printing for debugging
-    for token in &tokenStream.tokens {
-        println!("{:?}", token);
-    }
-
     // Creating a new Parser instance for AST.
-    let mut parser = Parser::new(tokenStream, None);
+    let parser = Parser::new(tokenStream, None);
 
     // Creating an interpreter module for program.
     let mut program = Interpreter::new(parser);
