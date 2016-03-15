@@ -107,7 +107,7 @@ impl TokenStream {
         let mut i = 0;
 
         while i < charCount {
-            let mut currentChar = self.code.chars().nth(i).unwrap();
+            let mut currentChar = self.nthChar(i);
 
             // If char is whitespace, just pass the current char
             if currentChar.is_whitespace() {
@@ -118,9 +118,9 @@ impl TokenStream {
                 let mut tmp = "".to_string();
 
                 // If current char is not out of our code scope and char starts with alphanumeric (alphabetic or numeric) characters
-                while i < charCount && self.code.chars().nth(i).unwrap().is_alphanumeric() {
+                while i < charCount && self.nthChar(i).is_alphanumeric() {
 
-                    tmp = tmp + &*self.code.chars().nth(i).unwrap().to_string();
+                    tmp = tmp + &*self.nthChar(i).to_string();
                     i += 1;
                 }
 
@@ -140,8 +140,8 @@ impl TokenStream {
             else if currentChar.is_numeric() {
                 let mut tmp = "".to_string();
 
-                while i < charCount && self.code.chars().nth(i).unwrap().is_numeric() {
-                    tmp = tmp + &*self.code.chars().nth(i).unwrap().to_string();
+                while i < charCount && self.nthChar(i).is_numeric() {
+                    tmp = tmp + &*self.nthChar(i).to_string();
                     i += 1;
                 }
 
@@ -152,8 +152,8 @@ impl TokenStream {
                 let mut tmp = "".to_string();
                 i += 1;
 
-                while i < charCount && self.code.chars().nth(i).unwrap() != '"'  {
-                    tmp = tmp + &*self.code.chars().nth(i).unwrap().to_string();
+                while i < charCount && self.nthChar(i) != '"'  {
+                    tmp = tmp + &*self.nthChar(i).to_string();
                     i += 1;
                 }
 
@@ -165,11 +165,11 @@ impl TokenStream {
                 let tmp = self.code.chars().nth(i + 1).unwrap();
                 i += 2;
 
-                if self.code.chars().nth(i).unwrap() == '\'' {
+                if self.nthChar(i) == '\'' {
                     tokens.push(Token { tokenType: TokenType::Char(tmp.to_string()), span: None });
                     i += 1;
                 } else {
-                    self.unexpectedToken(self.code.chars().nth(i).unwrap(), i);
+                    self.unexpectedToken(self.nthChar(i), i);
                 }
             }
             // If current char is an equals (=)
@@ -196,8 +196,8 @@ impl TokenStream {
             else if currentChar == '/' {
 
                 i += 1;
-                if i < charCount && self.code.chars().nth(i).unwrap() == '/' {
-                    while i < charCount && self.code.chars().nth(i).unwrap() != '\n' {
+                if i < charCount && self.nthChar(i) == '/' {
+                    while i < charCount && self.nthChar(i) != '\n' {
                         i += 1;
                     }
 
@@ -324,5 +324,9 @@ impl TokenStream {
         }
 
         self.tokens[self.pos].to_owned()
+    }
+
+    fn nthChar(& self, index : usize) -> char {
+        self.code.chars().nth(index).unwrap()
     }
 }
