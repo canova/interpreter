@@ -3,7 +3,7 @@
  * Lexer Module
  */
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum TokenType {
     Keyword(String),    // like int, string or let
     Identifier(String), // like variable names
@@ -107,7 +107,7 @@ impl TokenStream {
         let mut i = 0;
 
         while i < charCount {
-            let currentChar = self.code.chars().nth(i).unwrap();
+            let currentChar = self.nthChar(i);
 
             // If char is whitespace, just pass the current char
             if currentChar.is_whitespace() {
