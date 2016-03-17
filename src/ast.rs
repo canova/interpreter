@@ -47,3 +47,9 @@ pub enum Constant {
     Integer(i64),
     Bool(bool)
 }
+
+#[derive(Debug, Clone)]
+pub enum RPNValue {
+    Operator(TokenType),
+    Number(i64)
+}

@@ -4,6 +4,7 @@
  */
 
 use std::string::String;
+use std::collections::HashMap;
 use lexer::*;
 use ast::*;
 
@@ -67,6 +68,23 @@ impl Parser {
         }
     }
 
+    fn eatOperator(&mut self) -> bool {
+        if self.eatToken("Plus") || self.eatToken("Minus") || self.eatToken("Multiple") || self.eatToken("Divide") || self.eatToken("Mod") {
+            true
+        } else {
+            false
+        }
+    }
+
+    fn getCurrentNumber(&mut self) -> i64 {
+        match self.token.tokenType.clone() {
+                TokenType::Number(ref y) => {
+                    y.parse::<i64>().unwrap()
+                },
+                _ => panic!("Error while parsing to integer.")
+            }
+    }
+
     pub fn parse(&mut self) -> Box<Expr> {
         let mut block: Vec<Box<Expr>>= vec![];
 
@@ -118,22 +136,7 @@ impl Parser {
 
             // Eat equal symbol (=)
             if self.eatToken("Equals") {
-                // Eat number
-                if self.eatToken("Number") {
-                    // Create an expression and return it.
-                    match self.token.tokenType.clone() {
-                        TokenType::Number(ref y) => {
-                            number = y.parse::<i64>().unwrap();
-                            expr = Expr_::Assign (
-                                identifier,
-                                Box::new(Expr {span: None, node: Expr_::Constant (Constant::Integer(number))})
-                            );
-                            self.expectSemicolon();
-                            return expr;
-                        },
-                        _ => unimplemented!()
-                    };
-                }
+                return self.calculate(identifier);
             } else {
                 self.unexpectedToken("Equals");
             }
@@ -142,6 +145,89 @@ impl Parser {
         }
 
         Expr_::Nil
+    }
+
+    /**
+     * Calculate arithmetic expression with Shunting-Yard Algorithm
+     */
+    fn calculate(&mut self, identifier: String) -> Expr_ {
+        let mut operatorStack: Vec<TokenType> = vec![];
+        let mut rpn: Vec<RPNValue> = vec![];
+        let mut opPrecedences : HashMap<TokenType, usize> = HashMap::new();
+        let mut waitExp = true;
+
+        opPrecedences.insert(TokenType::Plus, 2);
+        opPrecedences.insert(TokenType::Minus, 2);
+        opPrecedences.insert(TokenType::Multiple, 3);
+        opPrecedences.insert(TokenType::Divide, 3);
+        opPrecedences.insert(TokenType::Mod, 3);
+
+        loop {
+            if self.eatToken("Number") { // Get first number
+                rpn.push(RPNValue::Number(self.getCurrentNumber()));
+                waitExp = false;
+            } else if waitExp { // If number is not set break the loop
+                break;
+            } else if self.eatOperator() {
+                let mut stackLen = operatorStack.len();
+
+                while stackLen > 0 && opPrecedences.get(&self.token.tokenType) < opPrecedences.get(&operatorStack[stackLen - 1]) {
+                    rpn.push(RPNValue::Operator(operatorStack[stackLen - 1].to_owned()));
+                    operatorStack.remove(stackLen - 1);
+                    stackLen = stackLen - 1;
+                }
+
+                operatorStack.push(self.token.tokenType.clone());
+                waitExp = true;
+            } else {
+                self.expectSemicolon();
+                break;
+            }
+
+        }
+        if waitExp {
+            self.unexpectedToken("Number");
+        }
+
+        for op in operatorStack.iter().rev() {
+            rpn.push(RPNValue::Operator(op.to_owned()));
+        }
+
+        Expr_::Assign (
+            identifier,
+            Box::new(Expr {span: None, node: Expr_::Constant (Constant::Integer(self.solveRPN(rpn)))})
+        )
+    }
+
+    fn solveRPN(&mut self, rpn: Vec<RPNValue>) -> i64 {
+        let mut valStack: Vec<i64> = vec![];
+
+        for value in rpn {
+            match value {
+                RPNValue::Number(ref x) => valStack.push(*x),
+                RPNValue::Operator(ref x) => {
+                    let stackLength = valStack.len();
+
+                    if stackLength >= 2 {
+                        let first = valStack.pop().unwrap();
+                        let second = valStack.pop().unwrap();
+
+                        match *x {
+                            TokenType::Plus => valStack.push(second + first),
+                            TokenType::Minus => valStack.push(second - first),
+                            TokenType::Multiple => valStack.push(second * first),
+                            TokenType::Divide => valStack.push(second / first),
+                            TokenType::Mod => valStack.push(second % first),
+                            _ => self.unexpectedToken(x.toString())
+                        }
+                    } else {
+                        panic!("Parse error in arithmetic value. Check int assignment.");
+                    }
+                }
+            }
+        }
+
+        valStack[0]
     }
 
     fn parseString(&mut self) -> Expr_ {
