@@ -34,7 +34,7 @@ pub enum Expr_ {
     // Function Call, first field is name of the function, second is list of arguments
     Call(String, Vec<Box<Expr>>),
     // Literal expression
-    Literal(i64),
+    Literal(f64),
     // End of File
     EOF,
     // Null
@@ -44,12 +44,6 @@ pub enum Expr_ {
 #[derive(Debug, Clone)]
 pub enum Constant {
     String(String),
-    Integer(i64),
+    Integer(f64),
     Bool(bool)
-}
-
-#[derive(Debug, Clone)]
-pub enum RPNValue {
-    Operator(TokenType),
-    Number(i64)
 }

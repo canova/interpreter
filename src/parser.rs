@@ -17,6 +17,15 @@ pub struct Parser {
     pub currentIndex: usize        // Current token index of TokenStream
 }
 
+/* Reverse Polish Notation value enum for
+ * Shunting-Yard Algorithm to caculate arithmetic values
+ */
+#[derive(Debug, Clone)]
+enum RPNValue {
+    Operator(TokenType),
+    Number(f64)
+}
+
 impl Parser {
     pub fn new(mut _tokenStream: TokenStream, _span: Option<Span>) -> Parser {
         let _tokenCount = _tokenStream.tokens.len();
@@ -59,7 +68,7 @@ impl Parser {
     fn advanceToken(&mut self) -> bool {
         self.currentIndex += 1;
 
-        // If have next token get next token and return true otherwise return false.
+        // If have next token, get next token and return true otherwise return false.
         if self.currentIndex == self.tokenCount {
             false
         } else {
@@ -69,17 +78,19 @@ impl Parser {
     }
 
     fn eatOperator(&mut self) -> bool {
-        if self.eatToken("Plus") || self.eatToken("Minus") || self.eatToken("Multiple") || self.eatToken("Divide") || self.eatToken("Mod") {
+        if self.eatToken("Plus")
+            || self.eatToken("Minus") || self.eatToken("Multiple")
+            || self.eatToken("Divide") || self.eatToken("Mod") {
             true
         } else {
             false
         }
     }
 
-    fn getCurrentNumber(&mut self) -> i64 {
+    fn getCurrentNumber(&mut self) -> f64 {
         match self.token.tokenType.clone() {
                 TokenType::Number(ref y) => {
-                    y.parse::<i64>().unwrap()
+                    y.parse::<f64>().unwrap()
                 },
                 _ => panic!("Error while parsing to integer.")
             }
@@ -99,9 +110,10 @@ impl Parser {
 
             // Determine the parse type for current or (if not enough) next token.
             let stmt = match self.token.tokenType.clone() {
-                TokenType::Keyword(ref x) if x == "int" => Box::new(Expr {span: None, node: self.parseInteger()}),
+                TokenType::Keyword(ref x) if x == "number" => Box::new(Expr {span: None, node: self.parseInteger()}),
                 TokenType::Keyword(ref x) if x == "string" => Box::new(Expr {span: None, node: self.parseString()}),
                 TokenType::Keyword(ref x) if x == "bool" => Box::new(Expr {span: None, node: self.parseBool()}),
+                TokenType::Identifier(ref x) if x == "if" => Box::new(Expr {span: None, node: self.parseIf()}),
                 TokenType::Identifier(ref x) => {
                     // Eat LParen
                     if self.eatToken("LParen") {
@@ -111,6 +123,7 @@ impl Parser {
                         unimplemented!();
                     }
                 },
+                TokenType::RBrace => break,
                 TokenType::EOF => { block.push(Box::new(Expr {span: None, node: Expr_::EOF})); break },
                 _ => { self.unexpectedToken(self.token.tokenType.toString()); Box::new(Expr {span: None, node: Expr_::Nil}) }
             };
@@ -124,7 +137,7 @@ impl Parser {
 
     fn parseInteger(&mut self) -> Expr_ {
         let identifier : String;
-        let number : i64;
+        let number : f64;
         let expr : Expr_;
 
         // Eat identifier
@@ -156,12 +169,14 @@ impl Parser {
         let mut opPrecedences : HashMap<TokenType, usize> = HashMap::new();
         let mut waitExp = true;
 
+        // Push operators to precendeces list
         opPrecedences.insert(TokenType::Plus, 2);
         opPrecedences.insert(TokenType::Minus, 2);
         opPrecedences.insert(TokenType::Multiple, 3);
         opPrecedences.insert(TokenType::Divide, 3);
         opPrecedences.insert(TokenType::Mod, 3);
 
+        // Loop for all numbers and operators
         loop {
             if self.eatToken("Number") { // Get first number
                 rpn.push(RPNValue::Number(self.getCurrentNumber()));
@@ -199,8 +214,8 @@ impl Parser {
         )
     }
 
-    fn solveRPN(&mut self, rpn: Vec<RPNValue>) -> i64 {
-        let mut valStack: Vec<i64> = vec![];
+    fn solveRPN(&mut self, rpn: Vec<RPNValue>) -> f64 {
+        let mut valStack: Vec<f64> = vec![];
 
         for value in rpn {
             match value {
@@ -307,6 +322,57 @@ impl Parser {
         }
 
         Expr_::Nil
+    }
+
+    fn parseIf(&mut self) -> Expr_ {
+        let mut conditionIdentifier: String = "".to_string();
+        let mut ifBlock: Box<Expr> = Box::new(Expr {span: None, node: Expr_::Nil});
+        let mut elseBlock: Option<Box<Expr>> = None;
+
+        // Eat condition identifier
+        if self.eatToken("LParen") {
+            if self.eatToken("Identifier") {
+                match self.token.tokenType {
+                    TokenType::Identifier(ref x) => conditionIdentifier = x.clone(),
+                    _ => unimplemented!()
+                };
+            } else {
+                self.unexpectedToken("Identifier");
+            }
+
+            // Eat right parenthesis
+            if self.eatToken("RParen") {
+                if self.eatToken("LBrace") {
+                    self.advanceToken();
+                    ifBlock = self.parse();
+
+                    if self.eatToken("else") {
+                        if self.eatToken("LBrace") {
+                            elseBlock = Some(self.parse());
+                        } else {
+                            self.unexpectedToken("LBrace");
+                        }
+                    } else {
+                        elseBlock = None;
+                    }
+                } else {
+                    self.unexpectedToken("LBrace");
+                }
+            } else {
+                self.unexpectedToken("RParen");
+            }
+        } else {
+            self.unexpectedToken("LParen");
+        }
+
+        Expr_::If(
+            Box::new(Expr {
+                span: None,
+                node: Expr_::Variable(conditionIdentifier)
+            }),
+            ifBlock,
+            elseBlock
+        )
     }
 
     fn parseCall(&mut self, identifier: String) -> Expr_ {

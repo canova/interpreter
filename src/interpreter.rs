@@ -33,7 +33,7 @@ impl Interpreter {
                         Expr_::Assign(ref identifier, ref value) => self.interpretAssign(identifier, value),
                         Expr_::Call(ref identifier, ref params) => self.interpretCall(identifier, params),
                         Expr_::EOF => println!("Program has ended."),
-                        _ => println!("Error!")
+                        _ => println!("Unimplemented feature found!")
                     }
                 }
             },
