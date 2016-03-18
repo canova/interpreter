@@ -210,7 +210,7 @@ impl Parser {
 
         Expr_::Assign (
             identifier,
-            Box::new(Expr {span: None, node: Expr_::Constant (Constant::Integer(self.solveRPN(rpn)))})
+            Box::new(Expr {span: None, node: Expr_::Constant (Constant::Number(self.solveRPN(rpn)))})
         )
     }
 

@@ -44,6 +44,16 @@ pub enum Expr_ {
 #[derive(Debug, Clone)]
 pub enum Constant {
     String(String),
-    Integer(f64),
+    Number(f64),
     Bool(bool)
+}
+
+impl Constant {
+    pub fn toString(&self) -> String {
+        match self.clone() {
+            Constant::String(ref x) => x.to_owned(),
+            Constant::Number(ref x) => x.to_string(),
+            Constant::Bool(ref x) => x.to_string(),
+        }
+    }
 }
