@@ -340,20 +340,27 @@ impl Parser {
                 self.unexpectedToken("Identifier");
             }
 
-            // Eat right parenthesis
+            // Eat right parenthesis for end of the condition
             if self.eatToken("RParen") {
+                // Eat left brace for the start of the if block
                 if self.eatToken("LBrace") {
+
                     self.advanceToken();
                     ifBlock = self.parse();
 
-                    if self.eatToken("else") {
-                        if self.eatToken("LBrace") {
-                            elseBlock = Some(self.parse());
-                        } else {
-                            self.unexpectedToken("LBrace");
+                    match self.tokenStream.tokens[self.currentIndex + 1].tokenType.clone() {
+                        TokenType::Identifier(ref x) if x == "else" => {
+                            self.advanceToken();
+
+                            // Eat left brace for start of the else block
+                            if self.eatToken("LBrace") {
+                                self.advanceToken();
+                                elseBlock = Some(self.parse());
+                            } else {
+                                self.unexpectedToken("LBrace");
+                            }
                         }
-                    } else {
-                        elseBlock = None;
+                        _ => elseBlock = None
                     }
                 } else {
                     self.unexpectedToken("LBrace");

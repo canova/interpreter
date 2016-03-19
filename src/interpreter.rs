@@ -10,12 +10,14 @@ use ast::*;
 use parser::*;
 
 /* Symbol Value Enum for Symbol Table */
+#[derive(Debug, Clone)]
 enum SymbolType {
     Variable,
     Function
 }
 
 /* Symbol Struct for Symbol Table */
+#[derive(Debug, Clone)]
 struct Symbol {
     symbolType: SymbolType,
     value: Constant
@@ -38,12 +40,18 @@ impl Interpreter {
     }
 
     pub fn run (&mut self) {
-        match self.ast.node.clone() {
+        let node =self.ast.node.clone();
+        self.runBlock(node);
+    }
+
+    fn runBlock(&mut self, expr: Expr_) {
+        match expr {
             Expr_::Block(ref lines) => {
                 for line in lines {
                     match line.node {
                         Expr_::Assign(ref identifier, ref value) => self.interpretAssign(identifier, value),
                         Expr_::Call(ref identifier, ref params) => self.interpretCall(identifier, params),
+                        Expr_::If(ref identifier, ref ifBlock, ref elseBlock) => self.interpretIf(identifier, ifBlock, elseBlock),
                         Expr_::EOF => println!("Program has ended."),
                         _ => println!("Unimplemented feature found!")
                     }
@@ -65,10 +73,37 @@ impl Interpreter {
     }
 
     fn interpretCall (&mut self, identifier: &String, params: &Vec<Box<Expr>>) {
-        if identifier == "print" {
+        if identifier == "yaz" {
             self.print(params.to_owned());
-        } else if identifier == "get" {
+        } else if identifier == "oku" {
             self.get(params.to_owned());
+        }
+    }
+
+    fn interpretIf (&mut self, identifier: &Box<Expr>, ifBlock: &Box<Expr>, elseBlock: &Option<Box<Expr>>) {
+        let mut variable: Symbol = Symbol { symbolType: SymbolType::Variable, value: Constant::String("Uninitilized variable found!".to_string())};
+
+        match identifier.node {
+            Expr_::Variable(ref x) => {
+                variable = self.symbolTable.get(x).unwrap().clone();
+            },
+            _ => unimplemented!()
+        }
+
+        match variable.value {
+            Constant::Bool(x) => {
+                if x {
+                    let _if = ifBlock.node.clone();
+                    self.runBlock(_if);
+                } else {
+                    match *elseBlock {
+                        Some(ref block) => { let _else = block.node.clone(); self.runBlock(_else); },
+                        None => {}
+                    }
+                }
+            },
+            Constant::String(ref x) => panic!("Uninitilized variable found!"),
+            _ => unimplemented!()
         }
     }
 
