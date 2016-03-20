@@ -3,14 +3,15 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 use std::env;
-use lexer::*;
-use parser::*;
-use interpreter::*;
 
 mod lexer;
 mod parser;
 mod ast;
 mod interpreter;
+
+use lexer::*;
+use parser::*;
+use interpreter::*;
 
 fn main() {
     let args: Vec<_> = env::args().collect();

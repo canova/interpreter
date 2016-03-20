@@ -83,6 +83,7 @@ impl Interpreter {
     fn interpretIf (&mut self, identifier: &Box<Expr>, ifBlock: &Box<Expr>, elseBlock: &Option<Box<Expr>>) {
         let mut variable: Symbol = Symbol { symbolType: SymbolType::Variable, value: Constant::String("Uninitilized variable found!".to_string())};
 
+        // Get if condition
         match identifier.node {
             Expr_::Variable(ref x) => {
                 variable = self.symbolTable.get(x).unwrap().clone();
@@ -90,12 +91,15 @@ impl Interpreter {
             _ => unimplemented!()
         }
 
+        // If condition is a bool value interpret if, otherwise display an error.
         match variable.value {
             Constant::Bool(x) => {
+                // If bool value is true then execute if block.
                 if x {
                     let _if = ifBlock.node.clone();
                     self.runBlock(_if);
                 } else {
+                    // If bool value is false and else block is exist, execute else block.
                     match *elseBlock {
                         Some(ref block) => { let _else = block.node.clone(); self.runBlock(_else); },
                         None => {}

@@ -5,6 +5,7 @@
 
 use std::string::String;
 use std::collections::HashMap;
+
 use lexer::*;
 use ast::*;
 
@@ -183,7 +184,7 @@ impl Parser {
                 waitExp = false;
             } else if waitExp { // If number is not set break the loop
                 break;
-            } else if self.eatOperator() {
+            } else if self.eatOperator() { // If eat an operator
                 let mut stackLen = operatorStack.len();
 
                 while stackLen > 0 && opPrecedences.get(&self.token.tokenType) < opPrecedences.get(&operatorStack[stackLen - 1]) {
@@ -194,20 +195,23 @@ impl Parser {
 
                 operatorStack.push(self.token.tokenType.clone());
                 waitExp = true;
-            } else {
+            } else { // This means expression is ended and we need a semicolon check.
                 self.expectSemicolon();
                 break;
             }
-
         }
+
+        // waitExp == true means line ended with an operator or line is empty.
         if waitExp {
             self.unexpectedToken("Number");
         }
 
+        // Popping stack and pushing to rpn queue.
         for op in operatorStack.iter().rev() {
             rpn.push(RPNValue::Operator(op.to_owned()));
         }
 
+        // Calling soveRPN function and returning it as Expr_.
         Expr_::Assign (
             identifier,
             Box::new(Expr {span: None, node: Expr_::Constant (Constant::Number(self.solveRPN(rpn)))})
@@ -217,6 +221,7 @@ impl Parser {
     fn solveRPN(&mut self, rpn: Vec<RPNValue>) -> f64 {
         let mut valStack: Vec<f64> = vec![];
 
+        // Read rpn queue and calculate the value.
         for value in rpn {
             match value {
                 RPNValue::Number(ref x) => valStack.push(*x),
