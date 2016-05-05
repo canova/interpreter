@@ -41,17 +41,17 @@ impl Interpreter {
 
     pub fn run (&mut self) {
         let node =self.ast.node.clone();
-        self.runBlock(node);
+        self.run_block(node);
     }
 
-    fn runBlock(&mut self, expr: Expr_) {
+    fn run_block(&mut self, expr: Expr_) {
         match expr {
             Expr_::Block(ref lines) => {
                 for line in lines {
                     match line.node {
-                        Expr_::Assign(ref identifier, ref value) => self.interpretAssign(identifier, value),
-                        Expr_::Call(ref identifier, ref params) => self.interpretCall(identifier, params),
-                        Expr_::If(ref identifier, ref ifBlock, ref elseBlock) => self.interpretIf(identifier, ifBlock, elseBlock),
+                        Expr_::Assign(ref identifier, ref value) => self.interpret_assign(identifier, value),
+                        Expr_::Call(ref identifier, ref params) => self.interpret_call(identifier, params),
+                        Expr_::If(ref identifier, ref ifBlock, ref elseBlock) => self.interpret_if(identifier, ifBlock, elseBlock),
                         Expr_::EOF => println!("Program has ended."),
                         _ => println!("Unimplemented feature found!")
                     }
@@ -62,7 +62,7 @@ impl Interpreter {
         }
     }
 
-    fn interpretAssign (&mut self, identifier: &String, value: &Box<Expr>) {
+    fn interpret_assign (&mut self, identifier: &String, value: &Box<Expr>) {
         match value.node {
             Expr_::Constant(ref constant) => {
                 self.symbolTable.insert(identifier.to_owned(), Symbol {symbolType: SymbolType::Variable, value: constant.to_owned()});
@@ -72,7 +72,7 @@ impl Interpreter {
         };
     }
 
-    fn interpretCall (&mut self, identifier: &String, params: &Vec<Box<Expr>>) {
+    fn interpret_call (&mut self, identifier: &String, params: &Vec<Box<Expr>>) {
         if identifier == "yaz" {
             self.print(params.to_owned());
         } else if identifier == "oku" {
@@ -80,7 +80,7 @@ impl Interpreter {
         }
     }
 
-    fn interpretIf (&mut self, identifier: &Box<Expr>, ifBlock: &Box<Expr>, elseBlock: &Option<Box<Expr>>) {
+    fn interpret_if (&mut self, identifier: &Box<Expr>, ifBlock: &Box<Expr>, elseBlock: &Option<Box<Expr>>) {
         let mut variable: Symbol = Symbol { symbolType: SymbolType::Variable, value: Constant::String("Uninitilized variable found!".to_string())};
 
         // Get if condition
@@ -97,11 +97,11 @@ impl Interpreter {
                 // If bool value is true then execute if block.
                 if x {
                     let _if = ifBlock.node.clone();
-                    self.runBlock(_if);
+                    self.run_block(_if);
                 } else {
                     // If bool value is false and else block is exist, execute else block.
                     match *elseBlock {
-                        Some(ref block) => { let _else = block.node.clone(); self.runBlock(_else); },
+                        Some(ref block) => { let _else = block.node.clone(); self.run_block(_else); },
                         None => {}
                     }
                 }

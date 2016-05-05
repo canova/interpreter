@@ -90,37 +90,37 @@ pub struct TokenStream {
 
 impl TokenStream {
     pub fn new(_code: String) -> TokenStream {
-        let mut newTokenStream = TokenStream {
+        let mut new_token_stream = TokenStream {
             code: _code,
             tokens: vec![],
             pos: 0,
             curr: None
         };
 
-        newTokenStream.tokenize();
-        newTokenStream
+        new_token_stream.tokenize();
+        new_token_stream
     }
 
     pub fn tokenize (&mut self) {
         let mut tokens : Vec<Token> = vec![]; // OR Vec::new();
-        let charCount = self.code.chars().count();
+        let char_count = self.code.chars().count();
         let mut i = 0;
 
-        while i < charCount {
-            let currentChar = self.nthChar(i);
+        while i < char_count {
+            let current_char = self.nth_char(i);
 
             // If char is whitespace, just pass the current char
-            if currentChar.is_whitespace() {
+            if current_char.is_whitespace() {
                 i += 1;
             }
             // If char starts with alphabetic characters
-            else if currentChar.is_alphabetic() {
+            else if current_char.is_alphabetic() {
                 let mut tmp = "".to_string();
 
                 // If current char is not out of our code scope and char starts with alphanumeric (alphabetic or numeric) characters
-                while i < charCount && self.nthChar(i).is_alphanumeric() {
+                while i < char_count && self.nth_char(i).is_alphanumeric() {
 
-                    tmp = tmp + &*self.nthChar(i).to_string();
+                    tmp = tmp + &*self.nth_char(i).to_string();
                     i += 1;
                 }
 
@@ -137,23 +137,23 @@ impl TokenStream {
                 }
             }
             // If current char is a numerical character
-            else if currentChar.is_numeric() {
+            else if current_char.is_numeric() {
                 let mut tmp = "".to_string();
 
-                while i < charCount && self.nthChar(i).is_numeric() {
-                    tmp = tmp + &*self.nthChar(i).to_string();
+                while i < char_count && self.nth_char(i).is_numeric() {
+                    tmp = tmp + &*self.nth_char(i).to_string();
                     i += 1;
                 }
 
                 tokens.push(Token { tokenType: TokenType::Number(tmp), span: None });
             }
             // If current char is a starting of a string
-            else if currentChar == '"' {
+            else if current_char == '"' {
                 let mut tmp = "".to_string();
                 i += 1;
 
-                while i < charCount && self.nthChar(i) != '"'  {
-                    tmp = tmp + &*self.nthChar(i).to_string();
+                while i < char_count && self.nth_char(i) != '"'  {
+                    tmp = tmp + &*self.nth_char(i).to_string();
                     i += 1;
                 }
 
@@ -161,43 +161,43 @@ impl TokenStream {
                 tokens.push(Token { tokenType: TokenType::String(tmp), span: None });
             }
             // If current char is a real char
-            else if currentChar == '\'' {
+            else if current_char == '\'' {
                 let tmp = self.code.chars().nth(i + 1).unwrap();
                 i += 2;
 
-                if self.nthChar(i) == '\'' {
+                if self.nth_char(i) == '\'' {
                     tokens.push(Token { tokenType: TokenType::Char(tmp.to_string()), span: None });
                     i += 1;
                 } else {
-                    self.unexpectedToken(self.nthChar(i), i);
+                    self.unexpected_token(self.nth_char(i), i);
                 }
             }
             // If current char is an equals (=)
-            else if currentChar == '=' {
+            else if current_char == '=' {
                 tokens.push(Token { tokenType: TokenType::Equals, span: None });
                 i += 1;
             }
             // If current char is a plus (+)
-            else if currentChar == '+' {
+            else if current_char == '+' {
                 tokens.push(Token { tokenType: TokenType::Plus, span: None });
                 i += 1;
             }
             // If current char is a minus (-)
-            else if currentChar == '-' {
+            else if current_char == '-' {
                 tokens.push(Token { tokenType: TokenType::Minus, span: None });
                 i += 1;
             }
             // If current char is a multiple (*)
-            else if currentChar == '*' {
+            else if current_char == '*' {
                 tokens.push(Token { tokenType: TokenType::Multiple, span: None });
                 i += 1;
             }
             // If current char is a divide (/) or comment ( starts with // )
-            else if currentChar == '/' {
+            else if current_char == '/' {
 
                 i += 1;
-                if i < charCount && self.nthChar(i) == '/' {
-                    while i < charCount && self.nthChar(i) != '\n' {
+                if i < char_count && self.nth_char(i) == '/' {
+                    while i < char_count && self.nth_char(i) != '\n' {
                         i += 1;
                     }
 
@@ -208,13 +208,13 @@ impl TokenStream {
                 }
             }
             // If current char is a mod (%)
-            else if currentChar == '%' {
+            else if current_char == '%' {
                 tokens.push(Token { tokenType: TokenType::Mod, span: None });
                 i += 1;
             }
             // If current char is a greater than (>) or greater than or equal to (>=)
-            else if currentChar == '>' {
-                if i + 1 < charCount && self.code.chars().nth(i + 1).unwrap() == '=' {
+            else if current_char == '>' {
+                if i + 1 < char_count && self.code.chars().nth(i + 1).unwrap() == '=' {
                     tokens.push(Token { tokenType: TokenType::GreaterEqual, span: None });
                     i += 1;
                 } else {
@@ -224,8 +224,8 @@ impl TokenStream {
                 i += 1;
             }
             // If current char is a lesser than (<) or lesser than or equal to (<=)
-            else if currentChar == '<' {
-                if i < charCount && self.code.chars().nth(i + 1).unwrap() == '=' {
+            else if current_char == '<' {
+                if i < char_count && self.code.chars().nth(i + 1).unwrap() == '=' {
                     tokens.push(Token { tokenType: TokenType::LesserEqual, span: None });
                     i += 1;
                 } else {
@@ -234,48 +234,48 @@ impl TokenStream {
                 i += 1;
             }
             // If current char is an Open Paranthesis ( ( )
-            else if currentChar == '(' {
+            else if current_char == '(' {
                 tokens.push(Token { tokenType: TokenType::LParen, span: None });
                 i += 1;
             }
             // If current char is a Close Paranthesis ( ) )
-            else if currentChar == ')' {
+            else if current_char == ')' {
                 tokens.push(Token { tokenType: TokenType::RParen, span: None });
                 i += 1;
             }
             // If current char is an Open Braces ( { )
-            else if currentChar == '{' {
+            else if current_char == '{' {
                 tokens.push(Token { tokenType: TokenType::LBrace, span: None });
                 i += 1;
             }
             // If current char is a Close Braces ( } )
-            else if currentChar == '}' {
+            else if current_char == '}' {
                 tokens.push(Token { tokenType: TokenType::RBrace, span: None });
                 i += 1;
             }
             // If current char is an Open Brackets ( [ )
-            else if currentChar == '[' {
+            else if current_char == '[' {
                 tokens.push(Token { tokenType: TokenType::LBracket, span: None });
                 i += 1;
             }
             // If current char is a Close Brackets ( ] )
-            else if currentChar == ']' {
+            else if current_char == ']' {
                 tokens.push(Token { tokenType: TokenType::RBracket, span: None });
                 i += 1;
             }
             // If current char is an semicolon ( ; )
-            else if currentChar == ',' {
+            else if current_char == ',' {
                 tokens.push(Token { tokenType: TokenType::Comma, span: None });
                 i += 1;
             }
             // If current char is an semicolon ( ; )
-            else if currentChar == ';' {
+            else if current_char == ';' {
                 tokens.push(Token { tokenType: TokenType::Semicolon, span: None });
                 i += 1;
             }
             // Else throw an exception
             else {
-                self.unexpectedToken(currentChar, i);
+                self.unexpected_token(current_char, i);
             }
         }
 
@@ -290,7 +290,7 @@ impl TokenStream {
         value == "main" || value == "number" || value == "string" || value == "bool" || value == "return"
     }
 
-    fn unexpectedToken (&self, c: char, i: usize) {
+    fn unexpected_token (&self, c: char, i: usize) {
         let mut lineCount = 1;
         let mut column : usize = 0;
         let mut isFirstLine = true;
@@ -326,7 +326,7 @@ impl TokenStream {
         self.tokens[self.pos].to_owned()
     }
 
-    fn nthChar(& self, index : usize) -> char {
+    fn nth_char (& self, index : usize) -> char {
         self.code.chars().nth(index).unwrap()
     }
 }
