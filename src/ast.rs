@@ -3,6 +3,7 @@
  * AST(Abstract Syntax Tree) Module
  */
 
+use std::fmt;
 use lexer::*;
 
 #[derive(Debug, Clone)]
@@ -11,6 +12,7 @@ pub struct Expr {
     pub node: Expr_
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum Expr_ {
     //Block of statements
@@ -41,19 +43,20 @@ pub enum Expr_ {
     Nil
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum Constant {
     String(String),
     Number(f64),
     Bool(bool)
 }
 
-impl Constant {
-    pub fn toString(&self) -> String {
+impl fmt::Debug for Constant {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.clone() {
-            Constant::String(ref x) => x.to_owned(),
-            Constant::Number(ref x) => x.to_string(),
-            Constant::Bool(ref x) => x.to_string(),
+            Constant::String(ref x) => write!(f, "{}", x.to_owned()),
+            Constant::Number(ref x) => write!(f, "{}", x.to_string()),
+            Constant::Bool(ref x) => write!(f, "{}", x.to_string()),
         }
     }
 }
+

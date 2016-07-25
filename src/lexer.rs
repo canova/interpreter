@@ -3,7 +3,9 @@
  * Lexer Module
  */
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+use std::fmt;
+
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub enum TokenType {
     Keyword(String),    // like int, string or let
     Identifier(String), // like variable names
@@ -34,36 +36,36 @@ pub enum TokenType {
     EOF                 // End of File
 }
 
-impl TokenType {
-    pub fn toString(&self) -> &str {
+impl fmt::Debug for TokenType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            TokenType::Keyword(ref x) => "Keyword",
-            TokenType::Identifier(ref x) => "Identifier",
-            TokenType::Char(ref x) => "Char",
-            TokenType::String(ref x) => "String",
-            TokenType::Number(ref x) => "Number",
-            TokenType::True => "True",
-            TokenType::False => "False",
-            TokenType::Equals => "Equals",
-            TokenType::Plus => "Plus",
-            TokenType::Minus => "Minus",
-            TokenType::Multiple => "Multiple",
-            TokenType::Divide => "Divide",
-            TokenType::Mod => "Mod",
-            TokenType::Greater => "Greater",
-            TokenType::Lesser => "Lesser",
-            TokenType::GreaterEqual => "GreaterEqual",
-            TokenType::LesserEqual => "LesserEqual",
-            TokenType::LParen => "LParen",
-            TokenType::RParen => "RParen",
-            TokenType::LBrace => "LBrace",
-            TokenType::RBrace => "RBrace",
-            TokenType::LBracket => "LBracket",
-            TokenType::RBracket => "RBracket",
-            TokenType::Comma => "Comma",
-            TokenType::Semicolon => "Semicolon",
-            TokenType::Comment => "Comment",
-            TokenType::EOF => "EOF"
+            TokenType::Keyword(_) => write!(f, "Keyword"),
+            TokenType::Identifier(_) => write!(f, "Identifier"),
+            TokenType::Char(_) => write!(f, "Char"),
+            TokenType::String(_) => write!(f, "String"),
+            TokenType::Number(_) => write!(f, "Number"),
+            TokenType::True => write!(f, "True"),
+            TokenType::False => write!(f, "False"),
+            TokenType::Equals => write!(f, "Equals"),
+            TokenType::Plus => write!(f, "Plus"),
+            TokenType::Minus => write!(f, "Minus"),
+            TokenType::Multiple => write!(f, "Multiple"),
+            TokenType::Divide => write!(f, "Divide"),
+            TokenType::Mod => write!(f, "Mod"),
+            TokenType::Greater => write!(f, "Greater"),
+            TokenType::Lesser => write!(f, "Lesser"),
+            TokenType::GreaterEqual => write!(f, "GreaterEqual"),
+            TokenType::LesserEqual => write!(f, "LesserEqual"),
+            TokenType::LParen => write!(f, "LParen"),
+            TokenType::RParen => write!(f, "RParen"),
+            TokenType::LBrace => write!(f, "LBrace"),
+            TokenType::RBrace => write!(f, "RBrace"),
+            TokenType::LBracket => write!(f, "LBracket"),
+            TokenType::RBracket => write!(f, "RBracket"),
+            TokenType::Comma => write!(f, "Comma"),
+            TokenType::Semicolon => write!(f, "Semicolon"),
+            TokenType::Comment => write!(f, "Comment"),
+            TokenType::EOF => write!(f, "EOF")
         }
     }
 }
@@ -76,7 +78,7 @@ pub struct Span {
 
 #[derive(Debug, Clone)]
 pub struct Token {
-    pub tokenType: TokenType,
+    pub token_type: TokenType,
     pub span: Option<Span>
 }
 
@@ -125,15 +127,15 @@ impl TokenStream {
                 }
 
                 //We have the word, now we need to find what it is and tokenize it.
-                let tmpStr = tmp.to_lowercase();
-                if self.isKeyword(&tmpStr) {
-                    tokens.push(Token { tokenType: TokenType::Keyword(tmpStr), span: None });
-                } else if tmpStr == "true" {
-                    tokens.push(Token {tokenType: TokenType::True, span: None });
-                } else if tmpStr == "false" {
-                    tokens.push(Token {tokenType: TokenType::False, span: None });
+                let tmp_str = tmp.to_lowercase();
+                if self.is_keyword(&tmp_str) {
+                    tokens.push(Token { token_type: TokenType::Keyword(tmp_str), span: None });
+                } else if tmp_str == "true" {
+                    tokens.push(Token {token_type: TokenType::True, span: None });
+                } else if tmp_str == "false" {
+                    tokens.push(Token {token_type: TokenType::False, span: None });
                 } else {
-                    tokens.push(Token {tokenType: TokenType::Identifier(tmpStr), span: None });
+                    tokens.push(Token {token_type: TokenType::Identifier(tmp_str), span: None });
                 }
             }
             // If current char is a numerical character
@@ -145,7 +147,7 @@ impl TokenStream {
                     i += 1;
                 }
 
-                tokens.push(Token { tokenType: TokenType::Number(tmp), span: None });
+                tokens.push(Token { token_type: TokenType::Number(tmp), span: None });
             }
             // If current char is a starting of a string
             else if current_char == '"' {
@@ -158,7 +160,7 @@ impl TokenStream {
                 }
 
                 i += 1;
-                tokens.push(Token { tokenType: TokenType::String(tmp), span: None });
+                tokens.push(Token { token_type: TokenType::String(tmp), span: None });
             }
             // If current char is a real char
             else if current_char == '\'' {
@@ -166,7 +168,7 @@ impl TokenStream {
                 i += 2;
 
                 if self.nth_char(i) == '\'' {
-                    tokens.push(Token { tokenType: TokenType::Char(tmp.to_string()), span: None });
+                    tokens.push(Token { token_type: TokenType::Char(tmp.to_string()), span: None });
                     i += 1;
                 } else {
                     self.unexpected_token(self.nth_char(i), i);
@@ -174,22 +176,22 @@ impl TokenStream {
             }
             // If current char is an equals (=)
             else if current_char == '=' {
-                tokens.push(Token { tokenType: TokenType::Equals, span: None });
+                tokens.push(Token { token_type: TokenType::Equals, span: None });
                 i += 1;
             }
             // If current char is a plus (+)
             else if current_char == '+' {
-                tokens.push(Token { tokenType: TokenType::Plus, span: None });
+                tokens.push(Token { token_type: TokenType::Plus, span: None });
                 i += 1;
             }
             // If current char is a minus (-)
             else if current_char == '-' {
-                tokens.push(Token { tokenType: TokenType::Minus, span: None });
+                tokens.push(Token { token_type: TokenType::Minus, span: None });
                 i += 1;
             }
             // If current char is a multiple (*)
             else if current_char == '*' {
-                tokens.push(Token { tokenType: TokenType::Multiple, span: None });
+                tokens.push(Token { token_type: TokenType::Multiple, span: None });
                 i += 1;
             }
             // If current char is a divide (/) or comment ( starts with // )
@@ -202,23 +204,23 @@ impl TokenStream {
                     }
 
                     i += 1;
-                    tokens.push(Token { tokenType: TokenType::Comment, span: None });
+                    tokens.push(Token { token_type: TokenType::Comment, span: None });
                 } else {
-                    tokens.push(Token { tokenType: TokenType::Divide, span: None });
+                    tokens.push(Token { token_type: TokenType::Divide, span: None });
                 }
             }
             // If current char is a mod (%)
             else if current_char == '%' {
-                tokens.push(Token { tokenType: TokenType::Mod, span: None });
+                tokens.push(Token { token_type: TokenType::Mod, span: None });
                 i += 1;
             }
             // If current char is a greater than (>) or greater than or equal to (>=)
             else if current_char == '>' {
                 if i + 1 < char_count && self.code.chars().nth(i + 1).unwrap() == '=' {
-                    tokens.push(Token { tokenType: TokenType::GreaterEqual, span: None });
+                    tokens.push(Token { token_type: TokenType::GreaterEqual, span: None });
                     i += 1;
                 } else {
-                    tokens.push(Token { tokenType: TokenType::Greater, span: None });
+                    tokens.push(Token { token_type: TokenType::Greater, span: None });
                 }
 
                 i += 1;
@@ -226,51 +228,51 @@ impl TokenStream {
             // If current char is a lesser than (<) or lesser than or equal to (<=)
             else if current_char == '<' {
                 if i < char_count && self.code.chars().nth(i + 1).unwrap() == '=' {
-                    tokens.push(Token { tokenType: TokenType::LesserEqual, span: None });
+                    tokens.push(Token { token_type: TokenType::LesserEqual, span: None });
                     i += 1;
                 } else {
-                    tokens.push(Token { tokenType: TokenType::Lesser, span: None });
+                    tokens.push(Token { token_type: TokenType::Lesser, span: None });
                 }
                 i += 1;
             }
             // If current char is an Open Paranthesis ( ( )
             else if current_char == '(' {
-                tokens.push(Token { tokenType: TokenType::LParen, span: None });
+                tokens.push(Token { token_type: TokenType::LParen, span: None });
                 i += 1;
             }
             // If current char is a Close Paranthesis ( ) )
             else if current_char == ')' {
-                tokens.push(Token { tokenType: TokenType::RParen, span: None });
+                tokens.push(Token { token_type: TokenType::RParen, span: None });
                 i += 1;
             }
             // If current char is an Open Braces ( { )
             else if current_char == '{' {
-                tokens.push(Token { tokenType: TokenType::LBrace, span: None });
+                tokens.push(Token { token_type: TokenType::LBrace, span: None });
                 i += 1;
             }
             // If current char is a Close Braces ( } )
             else if current_char == '}' {
-                tokens.push(Token { tokenType: TokenType::RBrace, span: None });
+                tokens.push(Token { token_type: TokenType::RBrace, span: None });
                 i += 1;
             }
             // If current char is an Open Brackets ( [ )
             else if current_char == '[' {
-                tokens.push(Token { tokenType: TokenType::LBracket, span: None });
+                tokens.push(Token { token_type: TokenType::LBracket, span: None });
                 i += 1;
             }
             // If current char is a Close Brackets ( ] )
             else if current_char == ']' {
-                tokens.push(Token { tokenType: TokenType::RBracket, span: None });
+                tokens.push(Token { token_type: TokenType::RBracket, span: None });
                 i += 1;
             }
             // If current char is an semicolon ( ; )
             else if current_char == ',' {
-                tokens.push(Token { tokenType: TokenType::Comma, span: None });
+                tokens.push(Token { token_type: TokenType::Comma, span: None });
                 i += 1;
             }
             // If current char is an semicolon ( ; )
             else if current_char == ';' {
-                tokens.push(Token { tokenType: TokenType::Semicolon, span: None });
+                tokens.push(Token { token_type: TokenType::Semicolon, span: None });
                 i += 1;
             }
             // Else throw an exception
@@ -280,43 +282,43 @@ impl TokenStream {
         }
 
         // End od file Token
-        tokens.push(Token {tokenType: TokenType::EOF, span: None});
+        tokens.push(Token {token_type: TokenType::EOF, span: None});
 
         self.tokens = tokens;
     }
 
-    fn isKeyword (&self, value: &String) -> bool {
-        let valueStr = &*value;
-        value == "main" || value == "number" || value == "string" || value == "bool" || value == "return"
+    fn is_keyword (&self, value: &String) -> bool {
+        let value_str = &*value;
+        value_str == "main" || value_str == "number" || value_str == "string" || value_str == "bool" || value_str == "return"
     }
 
     fn unexpected_token (&self, c: char, i: usize) {
-        let mut lineCount = 1;
+        let mut line_count = 1;
         let mut column : usize = 0;
-        let mut isFirstLine = true;
+        let mut is_first_line = true;
 
-        for currIndex in (0..i).rev() {
-            if self.code.chars().nth(currIndex).unwrap() == '\n' {
-                if isFirstLine {
-                    column = i - currIndex;
-                    isFirstLine = false;
+        for curr_index in (0..i).rev() {
+            if self.code.chars().nth(curr_index).unwrap() == '\n' {
+                if is_first_line {
+                    column = i - curr_index;
+                    is_first_line = false;
                 }
-                lineCount += 1;
+                line_count += 1;
             }
         }
 
-        panic!("Unexpected token: {:?} at line {:?}, column {:?}!", c, lineCount, column);
+        panic!("Unexpected token: {:?} at line {:?}, column {:?}!", c, line_count, column);
     }
 
-    pub fn currentToken (&mut self) -> Token {
+    pub fn current_token (&mut self) -> Token {
         self.tokens[self.pos].to_owned()
     }
 
-    pub fn nextToken (&mut self) -> Token {
+    pub fn next_token (&mut self) -> Token {
         self.pos += 1;
 
         loop {
-            if self.tokens[self.pos].tokenType == TokenType::Comment {
+            if self.tokens[self.pos].token_type == TokenType::Comment {
                 self.pos += 1;
             } else {
                 break;

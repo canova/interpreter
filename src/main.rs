@@ -23,6 +23,8 @@ fn main() {
     if args.len() > 1 {
         println!("Your source file is: {}", args[1]);
         path = Path::new(&*args[1]);
+    } else {
+        println!("You are using default test source path: src/test/main.c");
     }
 
     // Open the source file.
@@ -40,10 +42,10 @@ fn main() {
     }
 
     // Get Tokens from the Lexer Module
-    let tokenStream = TokenStream::new(code);
+    let token_stream = TokenStream::new(code);
 
     // Creating a new Parser instance for AST.
-    let parser = Parser::new(tokenStream, None);
+    let parser = Parser::new(token_stream, None);
 
     // Creating an interpreter module for program.
     let mut program = Interpreter::new(parser);
