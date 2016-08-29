@@ -38,7 +38,7 @@ impl Interpreter {
         }
     }
 
-    pub fn run (&mut self) {
+    pub fn run(&mut self) {
         let node =self.ast.node.clone();
         self.run_block(node);
     }
@@ -61,17 +61,16 @@ impl Interpreter {
         }
     }
 
-    fn interpret_assign (&mut self, identifier: &String, value: &Box<Expr>) {
+    fn interpret_assign(&mut self, identifier: &str, value: &Box<Expr>) {
         match value.node {
             Expr_::Constant(ref constant) => {
                 self.symbol_table.insert(identifier.to_owned(), Symbol {symbol_type: SymbolType::Variable, value: constant.to_owned()});
             },
-
             _ => unimplemented!()
         };
     }
 
-    fn interpret_call (&mut self, identifier: &String, params: &[Box<Expr>]) {
+    fn interpret_call(&mut self, identifier: &str, params: &[Box<Expr>]) {
         if &*identifier == "yaz" {
             self.print(params.to_owned());
         } else if &*identifier == "oku" {
@@ -79,8 +78,11 @@ impl Interpreter {
         }
     }
 
-    fn interpret_if (&mut self, identifier: &Box<Expr>, if_block: &Box<Expr>, else_block: &Option<Box<Expr>>) {
-        let mut variable: Symbol = Symbol { symbol_type: SymbolType::Variable, value: Constant::String("Uninitilized variable found!".to_string())};
+    fn interpret_if(&mut self, identifier: &Box<Expr>, if_block: &Box<Expr>, else_block: &Option<Box<Expr>>) {
+        let mut variable: Symbol = Symbol { 
+            symbol_type: SymbolType::Variable, 
+            value: Constant::String("Uninitilized variable found!".to_string())
+        };
 
         // Get if condition
         if let Expr_::Variable(ref x) = identifier.node {
@@ -94,11 +96,10 @@ impl Interpreter {
                 if x {
                     let _if = if_block.node.clone();
                     self.run_block(_if);
-                } else {
-                    // If bool value is false and else block is exist, execute else block.
-                    if let Some(ref block) = *else_block {
-                        { let _else = block.node.clone(); self.run_block(_else); }
-                    }
+
+                // If bool value is false and else block is exist, execute else block.
+                } else if let Some(ref block) = *else_block {
+                    { let _else = block.node.clone(); self.run_block(_else); }
                 }
             },
             Constant::String(_) => panic!("Uninitilized variable found!"),
@@ -125,7 +126,6 @@ impl Interpreter {
                         None => println!("{:?} variable not found!", var)
                     }
                 },
-
                 _ => println!("Other type of node found!")
             }
         }
@@ -142,9 +142,9 @@ impl Interpreter {
                 Expr_::Variable(ref var) => {
                     self.symbol_table.insert(var.to_owned(), Symbol {symbol_type: SymbolType::Variable, value: Constant::String(line.clone())});
                 },
-
                 _ => println!("Parameter requires a variable identifier!")
             }
         }
     }
 }
+

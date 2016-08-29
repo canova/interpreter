@@ -103,8 +103,9 @@ impl TokenStream {
         new_token_stream
     }
 
-    pub fn tokenize (&mut self) {
-        let mut tokens : Vec<Token> = vec![]; // OR Vec::new();
+    #[allow(cyclomatic_complexity)]
+    pub fn tokenize(&mut self) {
+        let mut tokens : Vec<Token> = vec![];
         let char_count = self.code.chars().count();
         let mut i = 0;
 
@@ -287,12 +288,11 @@ impl TokenStream {
         self.tokens = tokens;
     }
 
-    fn is_keyword (&self, value: &String) -> bool {
-        let value_str = &*value;
-        value_str == "main" || value_str == "number" || value_str == "string" || value_str == "bool" || value_str == "return"
+    fn is_keyword(&self, value: &str) -> bool {
+        value == "main" || value == "number" || value == "string" || value == "bool" || value == "return"
     }
 
-    fn unexpected_token (&self, c: char, i: usize) {
+    fn unexpected_token(&self, c: char, i: usize) {
         let mut line_count = 1;
         let mut column : usize = 0;
         let mut is_first_line = true;
@@ -310,11 +310,11 @@ impl TokenStream {
         panic!("Unexpected token: {:?} at line {:?}, column {:?}!", c, line_count, column);
     }
 
-    pub fn current_token (&mut self) -> Token {
+    pub fn current_token(&mut self) -> Token {
         self.tokens[self.pos].to_owned()
     }
 
-    pub fn next_token (&mut self) -> Token {
+    pub fn next_token(&mut self) -> Token {
         self.pos += 1;
 
         loop {
@@ -328,7 +328,8 @@ impl TokenStream {
         self.tokens[self.pos].to_owned()
     }
 
-    fn nth_char (& self, index : usize) -> char {
+    fn nth_char(& self, index : usize) -> char {
         self.code.chars().nth(index).unwrap()
     }
 }
+

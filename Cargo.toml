@@ -2,3 +2,6 @@
 name = "interpreter"
 version = "0.1.0"
 authors = ["Nazım Can Altınova<canaltinova@users.noreply.github.com>"]
+
+[dependencies]
+clippy = "*"

@@ -84,13 +84,9 @@ impl Parser {
     }
 
     fn eat_operator(&mut self) -> bool {
-        if self.eat_token("Plus") ||
-            self.eat_token("Minus") || self.eat_token("Multiple") ||
-            self.eat_token("Divide") || self.eat_token("Mod") {
-            true
-        } else {
-            false
-        }
+        self.eat_token("Plus") || self.eat_token("Minus") || 
+        self.eat_token("Multiple") ||self.eat_token("Divide") ||
+        self.eat_token("Mod")
     }
 
     fn get_current_number(&mut self) -> f64 {
@@ -218,9 +214,9 @@ impl Parser {
         }
 
         // Calling soveRPN function and returning it as Expr_.
-        Expr_::Assign (
+        Expr_::Assign(
             identifier,
-            Box::new(Expr {span: None, node: Expr_::Constant (Constant::Number(self.solve_rpn(rpn)))})
+            Box::new(Expr {span: None, node: Expr_::Constant(Constant::Number(self.solve_rpn(rpn)))})
         )
     }
 
@@ -244,7 +240,7 @@ impl Parser {
                             TokenType::Multiple => val_stack.push(second * first),
                             TokenType::Divide => val_stack.push(second / first),
                             TokenType::Mod => val_stack.push(second % first),
-                            _ => self.unexpected_token(&self.token_to_string(&x))
+                            _ => self.unexpected_token(&self.token_to_string(x))
                         }
                     } else {
                         panic!("Parse error in arithmetic value. Check number assignment.");
@@ -276,9 +272,9 @@ impl Parser {
                     match self.token.token_type.clone() {
                         TokenType::String(ref y) => {
                             string = y.clone();
-                            expr = Expr_::Assign (
+                            expr = Expr_::Assign(
                                 identifier,
-                                Box::new(Expr {span: None, node: Expr_::Constant (Constant::String(string))})
+                                Box::new(Expr {span: None, node: Expr_::Constant(Constant::String(string))})
                             );
                             self.expect_semicolon();
                             expr
@@ -318,9 +314,9 @@ impl Parser {
                         TokenType::False => bool_val = false,
                         _ => unimplemented!()
                     };
-                    expr = Expr_::Assign (
+                    expr = Expr_::Assign(
                         identifier,
-                        Box::new(Expr {span: None, node: Expr_::Constant (Constant::Bool(bool_val))})
+                        Box::new(Expr {span: None, node: Expr_::Constant(Constant::Bool(bool_val))})
                     );
                     self.expect_semicolon();
                     return expr;
@@ -430,7 +426,7 @@ impl Parser {
             self.eat_token("Comma") // Logical check for do while loop
         } {}
 
-        expr = Expr_::Call (
+        expr = Expr_::Call(
             identifier,
             params
         );
@@ -453,3 +449,4 @@ impl Parser {
         }
     }
 }
+
