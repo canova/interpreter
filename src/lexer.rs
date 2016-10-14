@@ -288,6 +288,24 @@ impl TokenStream {
         self.tokens = tokens;
     }
 
+    pub fn current_token(&mut self) -> Token {
+        self.tokens[self.pos].to_owned()
+    }
+
+    pub fn next_token(&mut self) -> Token {
+        self.pos += 1;
+
+        loop {
+            if self.tokens[self.pos].token_type == TokenType::Comment {
+                self.pos += 1;
+            } else {
+                break;
+            }
+        }
+
+        self.tokens[self.pos].to_owned()
+    }
+
     fn is_keyword(&self, value: &str) -> bool {
         value == "main" || value == "number" || value == "string" || value == "bool" || value == "return"
     }
@@ -308,24 +326,6 @@ impl TokenStream {
         }
 
         panic!("Unexpected token: {:?} at line {:?}, column {:?}!", c, line_count, column);
-    }
-
-    pub fn current_token(&mut self) -> Token {
-        self.tokens[self.pos].to_owned()
-    }
-
-    pub fn next_token(&mut self) -> Token {
-        self.pos += 1;
-
-        loop {
-            if self.tokens[self.pos].token_type == TokenType::Comment {
-                self.pos += 1;
-            } else {
-                break;
-            }
-        }
-
-        self.tokens[self.pos].to_owned()
     }
 
     fn nth_char(& self, index : usize) -> char {
