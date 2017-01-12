@@ -1,7 +1,6 @@
-/*
- * Interpreter for Basic C like language
- * Parser Module
- */
+// Interpreter for Basic C like language
+// Parser Module
+//
 
 use std::string::String;
 use std::collections::HashMap;
@@ -11,21 +10,20 @@ use ast::*;
 
 #[derive(Clone)]
 pub struct Parser {
-    pub token_stream: TokenStream,  // TokenStream
-    pub token: Token,              // Current token
-    pub span: Option<Span>,        // Span of current token
-    pub token_count: usize,         // Total token count of TokenStream
-    pub current_index: usize        // Current token index of TokenStream
+    pub token_stream: TokenStream, // TokenStream
+    pub token: Token, // Current token
+    pub span: Option<Span>, // Span of current token
+    pub token_count: usize, // Total token count of TokenStream
+    pub current_index: usize, // Current token index of TokenStream
 }
 
-/* 
- * Reverse Polish Notation value enum for
- * Shunting-Yard Algorithm to caculate arithmetic values
- */
+// Reverse Polish Notation value enum for
+// Shunting-Yard Algorithm to caculate arithmetic values
+//
 #[derive(Debug, Clone)]
 enum RPNValue {
     Operator(TokenType),
-    Number(f64)
+    Number(f64),
 }
 
 impl Parser {
@@ -39,7 +37,7 @@ impl Parser {
             token: current_token,
             span: None,
             token_count: token_count,
-            current_index: 0
+            current_index: 0,
         }
     }
 
@@ -52,9 +50,11 @@ impl Parser {
         format!("{:?}", token_type)
     }
 
-    fn unexpected_token(&self, ut: &str) { // TODO: Make more user friendly errors. It is temporary for now.
-        panic!("Unexpected token found. Expected: {:?}, Found: {:?} instead.", ut,
-                self.token_stream.tokens[self.current_index + 1].token_type);
+    fn unexpected_token(&self, ut: &str) {
+        // TODO: Make more user friendly errors. It is temporary for now.
+        panic!("Unexpected token found. Expected: {:?}, Found: {:?} instead.",
+               ut,
+               self.token_stream.tokens[self.current_index + 1].token_type);
     }
 
     fn eat_token(&mut self, expected_token: &str) -> bool {
@@ -69,7 +69,8 @@ impl Parser {
     }
 
     fn check_token(&self, expected_token: &str) -> bool {
-        self.token_to_string(&self.token_stream.tokens[self.current_index + 1].token_type) == expected_token
+        self.token_to_string(&self.token_stream.tokens[self.current_index + 1].token_type) ==
+        expected_token
     }
 
     fn advance_token(&mut self) -> bool {
@@ -84,22 +85,19 @@ impl Parser {
     }
 
     fn eat_operator(&mut self) -> bool {
-        self.eat_token("Plus") || self.eat_token("Minus") || 
-        self.eat_token("Multiple") ||self.eat_token("Divide") ||
-        self.eat_token("Mod")
+        self.eat_token("Plus") || self.eat_token("Minus") || self.eat_token("Multiple") ||
+        self.eat_token("Divide") || self.eat_token("Mod")
     }
 
     fn get_current_number(&mut self) -> f64 {
         match self.token.token_type.clone() {
-                TokenType::Number(ref x) => {
-                    x.parse::<f64>().unwrap()
-                },
-                _ => panic!("Error while parsing to integer.")
-            }
+            TokenType::Number(ref x) => x.parse::<f64>().unwrap(),
+            _ => panic!("Error while parsing to integer."),
+        }
     }
 
     pub fn parse(&mut self) -> Box<Expr> {
-        let mut block: Vec<Box<Expr>>= vec![];
+        let mut block: Vec<Box<Expr>> = vec![];
 
         // Read all tokens and create statements, then push it to the block.
         while self.current_index < self.token_count {
@@ -112,24 +110,56 @@ impl Parser {
 
             // Determine the parse type for current or (if not enough) next token.
             let stmt = match self.token.token_type.clone() {
-                TokenType::Keyword(ref x) if x == "number" => Box::new(Expr {span: None, node: self.parse_integer()}),
-                TokenType::Keyword(ref x) if x == "string" => Box::new(Expr {span: None, node: self.parse_string()}),
-                TokenType::Keyword(ref x) if x == "bool" => Box::new(Expr {span: None, node: self.parse_bool()}),
-                TokenType::Identifier(ref x) if x == "if" => Box::new(Expr {span: None, node: self.parse_if()}),
+                TokenType::Keyword(ref x) if x == "number" => {
+                    Box::new(Expr {
+                        span: None,
+                        node: self.parse_integer(),
+                    })
+                }
+                TokenType::Keyword(ref x) if x == "string" => {
+                    Box::new(Expr {
+                        span: None,
+                        node: self.parse_string(),
+                    })
+                }
+                TokenType::Keyword(ref x) if x == "bool" => {
+                    Box::new(Expr {
+                        span: None,
+                        node: self.parse_bool(),
+                    })
+                }
+                TokenType::Identifier(ref x) if x == "if" => {
+                    Box::new(Expr {
+                        span: None,
+                        node: self.parse_if(),
+                    })
+                }
                 TokenType::Identifier(ref x) => {
                     // Eat LParen
                     if self.eat_token("LParen") {
-                        Box::new(Expr {span: None, node: self.parse_call(x.clone())})
+                        Box::new(Expr {
+                            span: None,
+                            node: self.parse_call(x.clone()),
+                        })
                     } else {
                         self.unexpected_token("LParen");
                         unimplemented!();
                     }
-                },
+                }
                 TokenType::RBrace => break,
-                TokenType::EOF => { block.push(Box::new(Expr {span: None, node: Expr_::EOF})); break },
+                TokenType::EOF => {
+                    block.push(Box::new(Expr {
+                        span: None,
+                        node: Expr_::EOF,
+                    }));
+                    break;
+                }
                 _ => {
                     self.unexpected_token(&self.token_to_string(&self.token.token_type));
-                    Box::new(Expr {span: None, node: Expr_::Nil})
+                    Box::new(Expr {
+                        span: None,
+                        node: Expr_::Nil,
+                    })
                 }
             };
 
@@ -137,17 +167,20 @@ impl Parser {
         }
 
         // Return Boxed block statement.
-        Box::new(Expr {span: None, node: Expr_::Block(block)})
+        Box::new(Expr {
+            span: None,
+            node: Expr_::Block(block),
+        })
     }
 
     fn parse_integer(&mut self) -> Expr_ {
-        let identifier : String;
+        let identifier: String;
 
         // Eat identifier
         if self.eat_token("Identifier") {
             match self.token.token_type {
                 TokenType::Identifier(ref x) => identifier = x.clone(),
-                _ => unimplemented!()
+                _ => unimplemented!(),
             };
 
             // Eat equal symbol (=)
@@ -169,7 +202,7 @@ impl Parser {
     fn calculate(&mut self, identifier: String) -> Expr_ {
         let mut operator_stack: Vec<TokenType> = vec![];
         let mut rpn: Vec<RPNValue> = vec![];
-        let mut op_precedences : HashMap<TokenType, usize> = HashMap::new();
+        let mut op_precedences: HashMap<TokenType, usize> = HashMap::new();
         let mut wait_exp = true;
 
         // Push operators to precendeces list
@@ -181,15 +214,20 @@ impl Parser {
 
         // Loop for all numbers and operators
         loop {
-            if self.eat_token("Number") { // Get first number
+            if self.eat_token("Number") {
+                // Get first number
                 rpn.push(RPNValue::Number(self.get_current_number()));
                 wait_exp = false;
-            } else if wait_exp { // If number is not set break the loop
+            } else if wait_exp {
+                // If number is not set break the loop
                 break;
-            } else if self.eat_operator() { // If eat an operator
+            } else if self.eat_operator() {
+                // If eat an operator
                 let mut stack_len = operator_stack.len();
 
-                while stack_len > 0 && op_precedences.get(&self.token.token_type) < op_precedences.get(&operator_stack[stack_len - 1]) {
+                while stack_len > 0 &&
+                      op_precedences.get(&self.token.token_type) <
+                      op_precedences.get(&operator_stack[stack_len - 1]) {
                     rpn.push(RPNValue::Operator(operator_stack[stack_len - 1].to_owned()));
                     operator_stack.remove(stack_len - 1);
                     stack_len -= 1;
@@ -197,7 +235,8 @@ impl Parser {
 
                 operator_stack.push(self.token.token_type.clone());
                 wait_exp = true;
-            } else { // This means expression is ended and we need a semicolon check.
+            } else {
+                // This means expression is ended and we need a semicolon check.
                 self.expect_semicolon();
                 break;
             }
@@ -214,10 +253,11 @@ impl Parser {
         }
 
         // Calling soveRPN function and returning it as Expr_.
-        Expr_::Assign(
-            identifier,
-            Box::new(Expr {span: None, node: Expr_::Constant(Constant::Number(self.solve_rpn(rpn)))})
-        )
+        Expr_::Assign(identifier,
+                      Box::new(Expr {
+                          span: None,
+                          node: Expr_::Constant(Constant::Number(self.solve_rpn(rpn))),
+                      }))
     }
 
     fn solve_rpn(&mut self, rpn: Vec<RPNValue>) -> f64 {
@@ -240,7 +280,7 @@ impl Parser {
                             TokenType::Multiple => val_stack.push(second * first),
                             TokenType::Divide => val_stack.push(second / first),
                             TokenType::Mod => val_stack.push(second % first),
-                            _ => self.unexpected_token(&self.token_to_string(x))
+                            _ => self.unexpected_token(&self.token_to_string(x)),
                         }
                     } else {
                         panic!("Parse error in arithmetic value. Check number assignment.");
@@ -253,15 +293,15 @@ impl Parser {
     }
 
     fn parse_string(&mut self) -> Expr_ {
-        let identifier : String;
-        let string : String;
-        let expr : Expr_;
+        let identifier: String;
+        let string: String;
+        let expr: Expr_;
 
         // Eat identifier
         if self.eat_token("Identifier") {
             match self.token.token_type {
                 TokenType::Identifier(ref x) => identifier = x.clone(),
-                _ => unimplemented!()
+                _ => unimplemented!(),
             };
 
             // Eat equal symbol (=)
@@ -272,14 +312,16 @@ impl Parser {
                     match self.token.token_type.clone() {
                         TokenType::String(ref y) => {
                             string = y.clone();
-                            expr = Expr_::Assign(
-                                identifier,
-                                Box::new(Expr {span: None, node: Expr_::Constant(Constant::String(string))})
-                            );
+                            expr = Expr_::Assign(identifier,
+                                                 Box::new(Expr {
+                                                     span: None,
+                                                     node:
+                                                         Expr_::Constant(Constant::String(string)),
+                                                 }));
                             self.expect_semicolon();
                             expr
-                        },
-                        _ => unimplemented!()
+                        }
+                        _ => unimplemented!(),
                     };
                 }
             } else {
@@ -293,31 +335,32 @@ impl Parser {
     }
 
     fn parse_bool(&mut self) -> Expr_ {
-        let identifier : String;
-        let bool_val : bool;
-        let expr : Expr_;
+        let identifier: String;
+        let bool_val: bool;
+        let expr: Expr_;
 
         // Eat identifier
         if self.eat_token("Identifier") {
             match self.token.token_type {
                 TokenType::Identifier(ref x) => identifier = x.clone(),
-                _ => unimplemented!()
+                _ => unimplemented!(),
             };
 
             // Eat equal symbol (=)
             if self.eat_token("Equals") {
                 // Eat True or False value
-                if self.eat_token("True") || self.eat_token("False"){
+                if self.eat_token("True") || self.eat_token("False") {
                     // Create an expression and return it.
                     match self.token.token_type.clone() {
                         TokenType::True => bool_val = true,
                         TokenType::False => bool_val = false,
-                        _ => unimplemented!()
+                        _ => unimplemented!(),
                     };
-                    expr = Expr_::Assign(
-                        identifier,
-                        Box::new(Expr {span: None, node: Expr_::Constant(Constant::Bool(bool_val))})
-                    );
+                    expr = Expr_::Assign(identifier,
+                                         Box::new(Expr {
+                                             span: None,
+                                             node: Expr_::Constant(Constant::Bool(bool_val)),
+                                         }));
                     self.expect_semicolon();
                     return expr;
                 }
@@ -333,7 +376,10 @@ impl Parser {
 
     fn parse_if(&mut self) -> Expr_ {
         let mut condition_identifier: String = "".to_string();
-        let mut if_block: Box<Expr> = Box::new(Expr {span: None, node: Expr_::Nil});
+        let mut if_block: Box<Expr> = Box::new(Expr {
+            span: None,
+            node: Expr_::Nil,
+        });
         let mut else_block: Option<Box<Expr>> = None;
 
         // Eat condition identifier
@@ -341,7 +387,7 @@ impl Parser {
             if self.eat_token("Identifier") {
                 match self.token.token_type {
                     TokenType::Identifier(ref x) => condition_identifier = x.clone(),
-                    _ => unimplemented!()
+                    _ => unimplemented!(),
                 };
             } else {
                 self.unexpected_token("Identifier");
@@ -367,7 +413,7 @@ impl Parser {
                                 self.unexpected_token("LBrace");
                             }
                         }
-                        _ => else_block = None
+                        _ => else_block = None,
                     }
                 } else {
                     self.unexpected_token("LBrace");
@@ -379,19 +425,17 @@ impl Parser {
             self.unexpected_token("LParen");
         }
 
-        Expr_::If(
-            Box::new(Expr {
-                span: None,
-                node: Expr_::Variable(condition_identifier)
-            }),
-            if_block,
-            else_block
-        )
+        Expr_::If(Box::new(Expr {
+                      span: None,
+                      node: Expr_::Variable(condition_identifier),
+                  }),
+                  if_block,
+                  else_block)
     }
 
     fn parse_call(&mut self, identifier: String) -> Expr_ {
-        let mut string : String;
-        let expr : Expr_;
+        let mut string: String;
+        let expr: Expr_;
         let mut params: Vec<Box<Expr>> = vec![];
 
         // Do While loop for parameters
@@ -401,10 +445,13 @@ impl Parser {
                 // Create an expression and return it.
                 match self.token.token_type {
                     TokenType::String(ref x) => string = x.clone(),
-                    _ => unimplemented!()
+                    _ => unimplemented!(),
                 };
 
-                let boxed_expr = Box::new(Expr {span: None, node: Expr_::Constant(Constant::String(string))});
+                let boxed_expr = Box::new(Expr {
+                    span: None,
+                    node: Expr_::Constant(Constant::String(string)),
+                });
                 params.push(boxed_expr);
 
             }
@@ -413,10 +460,13 @@ impl Parser {
                 // Create an expression and return it.
                 match self.token.token_type {
                     TokenType::Identifier(ref x) => string = x.clone(),
-                    _ => unimplemented!()
+                    _ => unimplemented!(),
                 };
 
-                let boxed_expr = Box::new(Expr {span: None, node: Expr_::Variable(string)});
+                let boxed_expr = Box::new(Expr {
+                    span: None,
+                    node: Expr_::Variable(string),
+                });
                 params.push(boxed_expr);
 
             } else {
@@ -426,10 +476,7 @@ impl Parser {
             self.eat_token("Comma") // Logical check for do while loop
         } {}
 
-        expr = Expr_::Call(
-            identifier,
-            params
-        );
+        expr = Expr_::Call(identifier, params);
 
         // Eat RParen
         if self.eat_token("RParen") {
@@ -449,4 +496,3 @@ impl Parser {
         }
     }
 }
-

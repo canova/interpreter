@@ -1,7 +1,6 @@
-/*
- * Interpreter for Basic C like language
- * AST(Abstract Syntax Tree) Module
- */
+// Interpreter for Basic C like language
+// AST(Abstract Syntax Tree) Module
+//
 
 use std::fmt;
 use lexer::*;
@@ -9,13 +8,13 @@ use lexer::*;
 #[derive(Debug, Clone)]
 pub struct Expr {
     pub span: Option<Span>, // It is optional because it's unimplemented yet. Make it work.
-    pub node: Expr_
+    pub node: Expr_,
 }
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum Expr_ {
-    //Block of statements
+    // Block of statements
     Block(Vec<Box<Expr>>),
     // Add two expressions.
     Add(Box<Expr>, Box<Expr>),
@@ -40,14 +39,14 @@ pub enum Expr_ {
     // End of File
     EOF,
     // Null
-    Nil
+    Nil,
 }
 
 #[derive(Clone)]
 pub enum Constant {
     String(String),
     Number(f64),
-    Bool(bool)
+    Bool(bool),
 }
 
 impl fmt::Debug for Constant {
@@ -59,4 +58,3 @@ impl fmt::Debug for Constant {
         }
     }
 }
-

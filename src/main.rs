@@ -18,7 +18,7 @@ use parser::*;
 use interpreter::*;
 
 fn main() {
-    // Try to get file from arguments. 
+    // Try to get file from arguments.
     // If given run this file, otherwise run "src/test/main.c"
     let args: Vec<_> = env::args().collect();
     let mut path = Path::new("src/test/main.c");
@@ -44,7 +44,7 @@ fn main() {
     // Read the source file and if it is success pass it to code variable. Otherwise, give error.
     match file.read_to_string(&mut code) {
         Err(why) => panic!("couldn't read {}: {}", display, Error::description(&why)),
-        Ok(_) => println!("")
+        Ok(_) => println!(""),
     }
 
     // Get Tokens from the Lexer Module
@@ -57,4 +57,3 @@ fn main() {
     let mut program = Interpreter::new(parser);
     program.run();
 }
-
